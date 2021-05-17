@@ -1,0 +1,116 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Category {
+  id         Int     @id @default(autoincrement())
+  nameRu     String  @unique @map("name_ru")
+  nameUk     String  @unique @map("name_uk")
+  titleRu    String  @map("title_ru")
+  titleUk    String  @map("title_uk")
+  pictureUrl String? @map("picture_url")
+
+  subcategories Subcategory[]
+
+  @@map("category")
+}
+
+model Subcategory {
+  id         Int     @id @default(autoincrement())
+  nameRu     String  @unique @map("name_ru")
+  nameUk     String  @unique @map("name_uk")
+  titleRu    String  @map("title_ru")
+  titleUk    String  @map("title_uk")
+  pictureUrl String? @map("picture_url")
+
+  categoryId Int      @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  Product Product[]
+  @@map("subcategory")
+}
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  nameRu        String   @unique @map("name_ru")
+  nameUk        String   @unique @map("name_uk")
+  titleRu       String   @map("title_ru")
+  titleUk       String   @map("title_uk")
+  descriptionRu String?  @map("description_ru")
+  descriptionUk String?  @map("description_uk")
+  shortChars    Json     @map("short_characteristics")
+  longCharsRu   String   @map("long_charcteristics_ru")
+  longCharsUk   String   @map("long_charcteristics_uk")
+  configuration Json
+  documents     String[]
+  faqs          Json[]
+
+  subcategoryId Int
+  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
+
+  @@map("product")
+}
+
+model AccessoryCategory {
+  id         Int    @id @default(autoincrement())
+  nameRu     String @unique @map("name_ru")
+  nameUk     String @unique @map("name_uk")
+  titleRu    String @map("title_ru")
+  titleUk    String @map("title_uk")
+  pictureUrl String @map("picture_url")
+
+  accessorySubcategory AccessorySubcategory[]
+
+  @@map("accessory_category")
+}
+
+model AccessorySubcategory {
+  id         Int    @id @default(autoincrement())
+  nameRu     String @unique @map("name_ru")
+  nameUk     String @unique @map("name_uk")
+  titleRu    String @map("title_ru")
+  titleUk    String @map("title_uk")
+  pictureUrl String @map("picture_url")
+
+  categoryId Int               @map("category_id")
+  category   AccessoryCategory @relation(fields: [categoryId], references: [id])
+
+  Accessory Accessory[]
+
+  @@map("accessory_sub_category")
+}
+
+model Accessory {
+  id            Int      @id @default(autoincrement())
+  nameRu        String   @unique @map("name_ru")
+  nameUk        String   @unique @map("name_uk")
+  titleRu       String   @map("title_ru")
+  titleUk       String   @map("title_uk")
+  descriptionRu String?  @map("description_ru")
+  descriptionUk String?  @map("description_uk")
+  shortChars    Json     @map("short_characteristics")
+  longCharsRu   String   @map("long_charcteristics_ru")
+  longCharsUk   String   @map("long_charcteristics_uk")
+  configuration Json
+  documents     String[]
+  faq           Json[]
+
+  accessorySubcategoryId Int                  @map("accessory_subcategory_id")
+  accessoryCategory      AccessorySubcategory @relation(fields: [accessorySubcategoryId], references: [id])
+
+  @@map("accessory")
+}
+
+model NewsPost {
+  id       Int      @id @default(autoincrement())
+  postDate DateTime @default(now()) @map("post_date")
+  title    String
+  text     String
+
+  @@map("news_post")
+}
