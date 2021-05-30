@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:dev": "rimraf ./dist, tsc --build",
     "build:prod": "tsc --build",
-    "start": "ts-node src/index.ts"
+    "start:dev": "ts-node src/index.ts",
+    "start:prod": "node ./dist/index.js",
+    "prisma:generate": "prisma generate"
   },
   "repository": {
     "type": "git",
