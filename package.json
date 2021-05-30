@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf ./dist, tsc --build",
+    "build:dev": "rimraf ./dist, tsc --build",
+    "build:prod": "tsc --build",
     "start": "ts-node src/index.ts"
   },
   "repository": {
