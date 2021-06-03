@@ -148,42 +148,42 @@ const updateProductDescriptionUk = async function (
   });
 };
 
-const updateProductConfiguration = async function (
-  productId: number,
-  configuration: any
-) {
-  return await prisma.product.update({
-    where: {
-      id: productId,
-    },
-    data: {
-      configuration: configuration,
-    },
-  });
-};
+// const updateProductConfiguration = async function (
+//   productId: number,
+//   configuration: any
+// ) {
+//   return await prisma.product.update({
+//     where: {
+//       id: productId,
+//     },
+//     data: {
+//       configuration: configuration,
+//     },
+//   });
+// };
 
-const updateProductDocuments = async function (
-  productId: number,
-  document: string
-) {
-  return await prisma.product.update({
-    where: {
-      id: productId,
-    },
-    data: {
-      documents: {
-        push: document,
-      },
-    },
-  });
-};
+// const updateProductDocuments = async function (
+//   productId: number,
+//   document: string
+// ) {
+//   return await prisma.product.update({
+//     where: {
+//       id: productId,
+//     },
+//     data: {
+//       documents: {
+//         push: document,
+//       },
+//     },
+//   });
+// };
 
 export {
   createProduct,
   getProductById,
   getAllProductsBySubcategoryId,
-  updateProductConfiguration,
-  updateProductDocuments,
+  // updateProductConfiguration,
+  // updateProductDocuments,
   updateProductNameRu,
   updateProductNameUk,
   updateProductTitleRu,

@@ -36,19 +36,19 @@ model Subcategory {
 }
 
 model Product {
-  id            Int      @id @default(autoincrement())
-  nameRu        String   @unique @map("name_ru")
-  nameUk        String   @unique @map("name_uk")
-  titleRu       String   @map("title_ru")
-  titleUk       String   @map("title_uk")
-  descriptionRu String?  @map("description_ru")
-  descriptionUk String?  @map("description_uk")
-  shortChars    Json     @map("short_characteristics")
-  longCharsRu   String   @map("long_charcteristics_ru")
-  longCharsUk   String   @map("long_charcteristics_uk")
-  configuration Json
-  documents     String[]
-  faqs          Json[]
+  id            Int     @id @default(autoincrement())
+  nameRu        String  @unique @map("name_ru")
+  nameUk        String  @unique @map("name_uk")
+  titleRu       String  @map("title_ru")
+  titleUk       String  @map("title_uk")
+  descriptionRu String? @map("description_ru")
+  descriptionUk String? @map("description_uk")
+  shortChars    Json    @map("short_characteristics")
+  longCharsRu   String  @map("long_charcteristics_ru")
+  longCharsUk   String  @map("long_charcteristics_uk")
+  // configuration Json
+  // documents     String[]
+  // faqs          Json[]
 
   subcategoryId Int
   subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])

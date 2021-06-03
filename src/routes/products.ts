@@ -66,8 +66,11 @@ const products: FastifyPluginCallback = async function (
     }
     const products: Product[] = [];
     for (let i = 0; i < subcategories.length; i++) {
-      products.concat(await getAllProductsBySubcategoryId(subcategories[i].id));
-    }
+      let temp = products.concat(await getAllProductsBySubcategoryId(subcategories[i].id));
+      temp.forEach((element: any) => {
+        products.push(element)
+      });
+    };
     return res.status(200).send({ subcategories, products });
   });
 };
