@@ -1,25 +1,23 @@
 export const enum ErrorTypes {
-  invalidProductDataError = "invalidProductDataError",
-  invalidAccessoryDataError = "invalidAccessoryDataError",
-  invalidCategoryDataError = "invalidCategoryDataError",
-  invalidSubcategoryDataError = "invalidSubcategoryDataError",
-  invalidNewsPostDataError = "invalidNewsPostDataError",
-  productNotFoundError = "productNotFoundError",
-  accessoriesNotFoundError = "accessoriesNotFoundError",
-  categoriesNotFoundError = "categoriesNotFoundError",
-  subcategoriesNotFoundError = "subcategoriesNotFoundError",
-  newsPostNotFoundError = "newsPostNotFoundError",
+  invalidCreationDataError = "invalidCreationDataError",
+  notFoundError = "notFoundError",
+  invalidUpdateDataError = "invalidUpdateDataError",
+  invalidDeleteDataError = "invalidDeleteDataError",
 }
 
 export const enum ErrorMessages {
-  invalidProductDataError = "Cannot create product with this data.",
-  invalidAccessoryDataError = "Cannot create accessory with this data.",
-  invalidCategoryDataError = "Cannot create category with this data.",
-  invalidSubcategoryDataError = "Cannot create subcategory with this data.",
-  invalidNewsPostDataError = "Cannot create news post with this data.",
-  productNotFoundError = "Product with this id was not found.",
-  accessoryNotFoundError = "Accessory with this id was not found.",
-  categoriesNotFoundError = "Cannot find categories.",
-  subcategoriesNotFoundError = "Cannot find subcategories with this category id.",
-  newsPostsNotFoundError = "Cannot find news posts.",
+  invalidCreationDataError = "Cannot create object with this data",
+  notFoundError = "Cannot find object with this data",
+  invalidUpdateDataError = "Cannot update object with this data",
+  invalidDeleteDataError = "Cannot delete object with this data",
+}
+
+export const enum ObjectTypes {
+  category = "Category",
+  subcategory = "Subcategory",
+  product = "Product",
+  accessoryCategory = "Accessory category",
+  accessorySubcategory = "Accessory subcategory",
+  accessory = "Accessory",
+  newsPost = "News post"
 }

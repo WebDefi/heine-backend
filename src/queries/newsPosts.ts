@@ -46,6 +46,17 @@ const updateNewsPostText = async function (newsPostId: number, text: string) {
   });
 };
 
+const updateNewsPostImageUrl = async function (newsPostId: number, text: string) {
+  return await prisma.newsPost.update({
+    where: {
+      id: newsPostId,
+    },
+    data: {
+      text: text,
+    },
+  });
+};
+
 const deleteNewsPost = async function (newPostId: number) {
   return await prisma.newsPost.delete({
     where: {
@@ -60,5 +71,6 @@ export {
   getAllNewsPosts,
   updateNewsPostTitle,
   updateNewsPostText,
+  updateNewsPostImageUrl,
   deleteNewsPost,
 };

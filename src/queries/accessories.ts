@@ -20,7 +20,7 @@ const getAccessoryById = async function (accessoryId: number) {
   });
 };
 
-const getAllAccessorysByAccessorySubcategoryId = async function (
+const getAllAccessoriesByAccessorySubcategoryId = async function (
   accessorySubcategoryId: number
 ) {
   return await prisma.accessory.findMany({
@@ -186,10 +186,26 @@ const updateAccessoryDocuments = async function (
   });
 };
 
+const deleteAccessory = async function (accessoryId: number) {
+  return await prisma.accessory.delete({
+    where: { 
+      id: accessoryId,
+    },
+  });
+};
+
+const deleteAccessoriesByAccessorySubcategoryId = async function (subcategoryId: number) {
+  return await prisma.accessory.deleteMany({
+    where: {
+      accessorySubcategoryId: subcategoryId,
+    },
+  });
+};
+
 export {
   createAccessory,
   getAccessoryById,
-  getAllAccessorysByAccessorySubcategoryId,
+  getAllAccessoriesByAccessorySubcategoryId,
   updateAccessoryConfiguration,
   updateAccessoryDocuments,
   updateAccessoryNameRu,
@@ -201,4 +217,6 @@ export {
   updateAccessoryLongCharsUk,
   updateAccessoryDescriptionRu,
   updateAccessoryDescriptionUk,
+  deleteAccessory,
+  deleteAccessoriesByAccessorySubcategoryId,
 };

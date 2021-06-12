@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { deleteAccessorySubcategoriesByAccessoryCategoryId } from "./accessorySubcategories";
 
 const prisma = new PrismaClient();
 
@@ -94,6 +95,15 @@ const updateAccessoryCategoryPictureUrl = async function (
   });
 };
 
+const deleteAccessoryCategory = async function (categoryId: number) {
+  await deleteAccessorySubcategoriesByAccessoryCategoryId(categoryId);
+  return await prisma.accessoryCategory.delete({
+    where: {
+      id: categoryId,
+    },
+  });
+};
+
 export {
   createAccessoryCategory,
   getAccessoryCategoryById,
@@ -103,4 +113,5 @@ export {
   updateAccessoryCategoryTitleRu,
   updateAccessoryCategoryTitleUk,
   updateAccessoryCategoryPictureUrl,
+  deleteAccessoryCategory,
 };

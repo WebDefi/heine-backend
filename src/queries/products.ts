@@ -148,42 +148,72 @@ const updateProductDescriptionUk = async function (
   });
 };
 
-// const updateProductConfiguration = async function (
-//   productId: number,
-//   configuration: any
-// ) {
-//   return await prisma.product.update({
-//     where: {
-//       id: productId,
-//     },
-//     data: {
-//       configuration: configuration,
-//     },
-//   });
-// };
+const updateProductConfiguration = async function (
+  productId: number,
+  configuration: any
+) {
+  return await prisma.product.update({
+    where: {
+      id: productId,
+    },
+    data: {
+      configuration: configuration,
+    },
+  });
+};
 
-// const updateProductDocuments = async function (
-//   productId: number,
-//   document: string
-// ) {
-//   return await prisma.product.update({
-//     where: {
-//       id: productId,
-//     },
-//     data: {
-//       documents: {
-//         push: document,
-//       },
-//     },
-//   });
-// };
+const updateProductDocuments = async function (
+  productId: number,
+  document: string
+) {
+  return await prisma.product.update({
+    where: {
+      id: productId,
+    },
+    data: {
+      documents: {
+        push: document,
+      },
+    },
+  });
+};
+
+const updateProductFAQs = async function (
+  productId: number,
+  faqs: any
+) {
+  return await prisma.product.update({
+    where: {
+      id: productId,
+    },
+    data: {
+      faqs: faqs,
+    },
+  });
+};
+
+const deleteProduct = async function (productId: number) {
+  return await prisma.product.delete({
+    where: { 
+      id: productId,
+    },
+  });
+};
+
+const deleteProductsBySubcategoryId = async function (subcategoryId: number) {
+  return await prisma.product.deleteMany({
+    where: {
+      subcategoryId: subcategoryId,
+    },
+  });
+};
 
 export {
   createProduct,
   getProductById,
   getAllProductsBySubcategoryId,
-  // updateProductConfiguration,
-  // updateProductDocuments,
+  updateProductConfiguration,
+  updateProductDocuments,
   updateProductNameRu,
   updateProductNameUk,
   updateProductTitleRu,
@@ -193,4 +223,7 @@ export {
   updateProductLongCharsUk,
   updateProductDescriptionRu,
   updateProductDescriptionUk,
+  updateProductFAQs,
+  deleteProduct,
+  deleteProductsBySubcategoryId,
 };
