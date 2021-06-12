@@ -97,6 +97,49 @@ const accessories: FastifyPluginCallback = async function (
     return res.status(200).send(accessoryCategories);
   });
 
+
+  fastify.get("/menu", {}, async (_req: any, res: any) => {
+    const categories: any = await getAllAccessoryCategories();
+    const data: Array<any> = [];
+    if (!categories) {
+      return res.status(400).send(new RequestError(
+            400,
+            ErrorTypes.notFoundError,
+            ErrorMessages.notFoundError,
+            ObjectTypes.category,
+          ));
+    }
+    for (const category of categories) {
+      let subcategories: AccessorySubcategory[] = await getAllAccessorySubcategoriesByCategoryId(category.id);
+      let subcategoriesData: Array<any> = [];
+      for (const subcategory of subcategories) {
+        let accessories = await getAllAccessoriesByAccessorySubcategoryId(subcategory.id);
+        let accessoriesData: Array<any> = [];
+        for(const accessory of accessories) {
+          accessoriesData.push({
+            nameRu: accessory.nameRu,
+            nameUk: accessory.nameUk,
+          });
+        }
+        subcategoriesData.push({
+          subcategory: {
+            nameRu: subcategory.nameRu,
+            nameUk: subcategory.nameUk,
+            accessories: accessoriesData,
+          },
+        });
+      }
+      data.push({
+        category: {
+          nameRu: category.nameRu,
+          nameUk: category.nameUk,
+          subcategories: subcategoriesData,
+        },
+      });
+    }
+    return res.status(200).send(data);
+  });
+
   fastify.get("/accessoryCategory/:categoryId", {}, async (req: any, res: any) => {
     const accessorySubcategories: any = await getAllAccessorySubcategoriesByCategoryId(
       parseInt(req.params.categoryId)
