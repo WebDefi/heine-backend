@@ -20,8 +20,8 @@ const news: FastifyPluginCallback = async function (fastify: FastifyInstance) {
           ErrorMessages.invalidCreationDataError,
           ObjectTypes.newsPost,
         ));
-      res.status(200).send(newsPost);
     }
+    res.status(200).send(newsPost);
   });
 
   fastify.get("/", {}, async (_req, res) => {

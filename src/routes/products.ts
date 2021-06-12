@@ -95,6 +95,48 @@ const products: FastifyPluginCallback = async function (
     return res.status(200).send(categories);
   });
 
+  fastify.get("/menu", {}, async (_req: any, res: any) => {
+    const categories: any = await getAllCategories();
+    const data: Array<any> = [];
+    if (!categories) {
+      return res.status(400).send(new RequestError(
+            400,
+            ErrorTypes.notFoundError,
+            ErrorMessages.notFoundError,
+            ObjectTypes.category,
+          ));
+    }
+    for (const category of categories) {
+      let subcategories: Subcategory[] = await getAllSubcategoriesByCategoryId(category.id);
+      let subcategoriesData: Array<any> = [];
+      for (const subcategory of subcategories) {
+        let products = await getAllProductsBySubcategoryId(subcategory.id);
+        let productsData: Array<any> = [];
+        for(const product of products) {
+          productsData.push({
+            nameRu: product.nameRu,
+            nameUk: product.nameUk,
+          });
+        }
+        subcategoriesData.push({
+          subcategory: {
+            nameRu: subcategory.nameRu,
+            nameUk: subcategory.nameUk,
+            products: productsData,
+          },
+        });
+      }
+      data.push({
+        category: {
+          nameRu: category.nameRu,
+          nameUk: category.nameUk,
+          subcategories: subcategoriesData,
+        },
+      });
+    }
+    return res.status(200).send(data);
+  });
+
   fastify.get("/category/:categoryId", {}, async (req: any, res: any) => {
     const subcategories: any = await getAllSubcategoriesByCategoryId(
       parseInt(req.params.categoryId)
