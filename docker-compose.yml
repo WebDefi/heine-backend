@@ -1,0 +1,22 @@
+version: "3.3"
+   
+services:
+  db:
+    image: postgres
+    volumes:
+      - /home/misha/postgresVolume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=heinedb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    command: npm run start:prod
+    volumes:
+      - /home/misha/heineImages:/usr/src/app/static
+    ports:
+      - "3000:3000"
+    environment: 
+      DATABASE_URL: postgres://postgres:postgres@db:5432/heinedb
+    depends_on:
+      - db
