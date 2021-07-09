@@ -83,7 +83,7 @@ const products: FastifyPluginCallback = async function (
   });
 
   fastify.get("/", {}, async (_req: any, res: any) => {
-    const categories = await getAllCategories();
+    const categories = {hello: "World"};
     if (!categories) {
       return res.status(400).send(new RequestError(
             400,
