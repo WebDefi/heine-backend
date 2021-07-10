@@ -39,6 +39,7 @@ import {
   updateSubcategoryTitleUk,
 } from "../queries/subcategories";
 import { Category, Product, Subcategory } from ".prisma/client";
+import {onSendGenericLangHandler} from './onSendLangHook'
 
 const products: FastifyPluginCallback = async function (
   fastify: FastifyInstance
@@ -82,7 +83,7 @@ const products: FastifyPluginCallback = async function (
     return res.status(200).send(product);
   });
 
-  fastify.get("/", {}, async (_req: any, res: any) => {
+  fastify.get("/", {onSend: onSendGenericLangHandler}, async (_req: any, res: any) => {
     const categories = await getAllCategories();
     if (!categories) {
       return res.status(400).send(new RequestError(

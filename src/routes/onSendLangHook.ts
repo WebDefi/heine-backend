@@ -1,20 +1,18 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 
-const onSendGenericLangHandler = (
+export const onSendGenericLangHandler = (
   req: FastifyRequest,
-  rep: FastifyReply,
+  _rep: FastifyReply,
   payload: any,
   done: any
 ) => {
+  const err = null;
   const lang = req.cookies.lang ?? "uk";
-
-  const staticLangRegxp = new RegExp("_ru|_uk", "gi");
+  payload = JSON.parse(payload);
   if (payload.length) {
     payload = payload.map((elObj: { [key: string]: any }) => {
-      // payload = [ {}, {}, {}]
       Object.keys(elObj).forEach((key: string) => {
-        if (staticLangRegxp.test(key)) {
-          // title_ru == true title_uk == true
+        if (/_ru|_uk/.test(key)) {
           if (new RegExp(`${lang}`).test(key)) {
             let tempValue = elObj[key];
             let tempNewKey = key.split("_")[0];
@@ -27,9 +25,25 @@ const onSendGenericLangHandler = (
       });
       return elObj;
     });
+    // console.log(payload);
   } else {
-    Object.keys(payload).forEach((key: string) => {}); // payload = {}
+    Object.keys(payload).forEach((key: string) => {
+      if (/_ru|_uk/.test(key)) {
+        // title_ru == true title_uk == true
+        if (new RegExp(`${lang}`).test(key)) {
+          let tempValue = payload[key];
+          let tempNewKey = key.split("_")[0];
+          delete payload[key];
+          payload[tempNewKey] = tempValue;
+        } else {
+          delete payload[key];
+        }
+      }
+    }); // payload = {}
   }
-  Object.assign(rep, { payload });
-  done();
+  payload = JSON.stringify(payload);
+  // Object.assign(rep, { payload });
+
+  // console.log(rep)
+  done(err, payload);
 };
