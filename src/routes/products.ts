@@ -40,6 +40,7 @@ import {
 } from "../queries/subcategories";
 import { Category, Product, Subcategory } from ".prisma/client";
 import {onSendGenericLangHandler} from './onSendLangHook'
+import { langParse } from "../utils/langHandler";
 
 const products: FastifyPluginCallback = async function (
   fastify: FastifyInstance
@@ -97,12 +98,12 @@ const products: FastifyPluginCallback = async function (
   });
 
 const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
-  return lang == 'ru' ? nameRu.split('_')[0] : nameUk.split('_')[0];
+  return lang == 'ru' ? nameRu : nameUk;
 }
 
-  fastify.get("/menu", {}, async (_req: any, res: any) => {
+  fastify.get("/menu", {}, async (req: any, res: any) => {
     const categories: any = await getAllCategories();
-    const lang = _req.cookies.lang ?? 'uk';
+    const lang = req.cookies.lang ?? 'uk';
     // Add postClientRequest hook on cookie lang
     const data: {[key: string]: any} = {};
     if (!categories) {
@@ -133,6 +134,7 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
   });
 
   fastify.get("/category/:categoryId", {}, async (req: any, res: any) => {
+    const lang = req.cookies.lang ?? "uk";
     const subcategories: any = await getAllSubcategoriesByCategoryId(
       parseInt(req.params.categoryId)
     );
@@ -145,16 +147,20 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
           ));
     }
     for (let i = 0; i < subcategories.length; i++) {
+      subcategories[i] = langParse(subcategories[i], lang);
+      let products = await getAllProductsBySubcategoryId(subcategories[i].id);
+      products.forEach((item, key, array) => array[key] = langParse(item, lang));
       subcategories[i] = { 
         subcategory: subcategories[i], 
-        products: await getAllProductsBySubcategoryId(subcategories[i].id) 
+        products: products,
       }
     }
     return res.status(200).send({ subcategories });
   });
 
-  fastify.get("/subcategory/:subcategoryId", {}, async (req: any, res: FastifyReply) => {
-      const subcategory = await getSubcategoryById(parseInt(req.params.subcategoryId));
+  fastify.get("/subcategory/:subcategoryId", {onSend: onSendGenericLangHandler}, async (req: any, res: FastifyReply) => {
+      const lang = req.cookies.lang ?? "uk";
+      let subcategory = await getSubcategoryById(parseInt(req.params.subcategoryId));
       if (!subcategory) {
         return res.status(400).send(new RequestError(
             400,
@@ -163,6 +169,7 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
             ObjectTypes.subcategory,
           ));
       }
+      subcategory = langParse(subcategory, lang);
       const products: Product[] = await getAllProductsBySubcategoryId(parseInt(req.params.subcategoryId));
       if (!products) {
         return res.status(400).send(new RequestError(
@@ -172,23 +179,25 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
             ObjectTypes.product,
           ));
       }
+      products.forEach((item, key, array) => array[key] = langParse(item, lang));
       return res.status(200).send({ subcategory, products });
     }
   );
 
-  fastify.get("/product/:productId", {}, async (req: any, res: FastifyReply) => {
-      const product: Product | null = await getProductById(parseInt(req.params.productId));
-      if (!product) {
-        return res.status(400).send(new RequestError(
-          400, 
-          ErrorTypes.notFoundError, 
-          ErrorMessages.notFoundError,
-          ObjectTypes.product,
-          ));
-      }
-      return res.status(200).send(product);
+  fastify.get("/product/:productId", {onSend: onSendGenericLangHandler}, async (req: any, res: FastifyReply) => {
+     let product: Product | null = await getProductById(parseInt(req.params.productId));
+     if (!product) {
+      return res.status(400).send(new RequestError(
+         400, 
+         ErrorTypes.notFoundError, 
+         ErrorMessages.notFoundError,
+         ObjectTypes.product,
+      ));
     }
-  );
+    product = langParse(product, req.cookies.lang ?? "uk");
+    return res.status(200).send(product);
+  }
+);
 
   fastify.patch("/category/update/nameRu/:categoryId", {}, async (req: any, res: FastifyReply) => {
     const category: Category | null = await getCategoryById(parseInt(req.params.categoryId));
