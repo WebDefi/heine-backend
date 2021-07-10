@@ -39,7 +39,7 @@ const updateAccessoryNameRu = async function (
       id: accessoryId,
     },
     data: {
-      nameRu: nameRu,
+      name_ru: nameRu,
     },
   });
 };
@@ -53,7 +53,7 @@ const updateAccessoryNameUk = async function (
       id: accessoryId,
     },
     data: {
-      nameUk: nameUk,
+      name_uk: nameUk,
     },
   });
 };
@@ -67,7 +67,7 @@ const updateAccessoryTitleRu = async function (
       id: accessoryId,
     },
     data: {
-      titleRu: titleRu,
+      title_ru: titleRu,
     },
   });
 };
@@ -81,7 +81,7 @@ const updateAccessoryTitleUk = async function (
       id: accessoryId,
     },
     data: {
-      titleUk: titleUk,
+      title_uk: titleUk,
     },
   });
 };
@@ -109,7 +109,7 @@ const updateAccessoryLongCharsRu = async function (
       id: accessoryId,
     },
     data: {
-      longCharsRu: longCharsRu,
+      longChars_ru: longCharsRu,
     },
   });
 };
@@ -123,7 +123,7 @@ const updateAccessoryLongCharsUk = async function (
       id: accessoryId,
     },
     data: {
-      longCharsUk: longCharsUk,
+      longChars_uk: longCharsUk,
     },
   });
 };
@@ -137,7 +137,7 @@ const updateAccessoryDescriptionRu = async function (
       id: accessoryId,
     },
     data: {
-      descriptionRu: descriptionRu,
+      description_ru: descriptionRu,
     },
   });
 };
@@ -151,7 +151,7 @@ const updateAccessoryDescriptionUk = async function (
       id: accessoryId,
     },
     data: {
-      descriptionUk: descriptionUk,
+      description_uk: descriptionUk,
     },
   });
 };

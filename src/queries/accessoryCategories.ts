@@ -34,7 +34,7 @@ const updateAccessoryCategoryNameRu = async function (
       id: accessoryCategoryId,
     },
     data: {
-      nameRu: nameRu,
+      name_ru: nameRu,
     },
   });
 };
@@ -48,7 +48,7 @@ const updateAccessoryCategoryNameUk = async function (
       id: accessoryCategoryId,
     },
     data: {
-      nameUk: nameUk,
+      name_uk: nameUk,
     },
   });
 };
@@ -62,7 +62,7 @@ const updateAccessoryCategoryTitleRu = async function (
       id: accessoryCategoryId,
     },
     data: {
-      titleRu: titleRu,
+      title_ru: titleRu,
     },
   });
 };
@@ -76,7 +76,7 @@ const updateAccessoryCategoryTitleUk = async function (
       id: accessoryCategoryId,
     },
     data: {
-      titleUk: titleUk,
+      title_uk: titleUk,
     },
   });
 };

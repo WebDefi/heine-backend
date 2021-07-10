@@ -117,14 +117,14 @@ const accessories: FastifyPluginCallback = async function (
         let accessoriesData: Array<any> = [];
         for(const accessory of accessories) {
           accessoriesData.push({
-            nameRu: accessory.nameRu,
-            nameUk: accessory.nameUk,
+            nameRu: accessory.name_ru,
+            nameUk: accessory.name_uk,
           });
         }
         subcategoriesData.push({
           subcategory: {
-            nameRu: subcategory.nameRu,
-            nameUk: subcategory.nameUk,
+            nameRu: subcategory.name_ru,
+            nameUk: subcategory.name_uk,
             accessories: accessoriesData,
           },
         });

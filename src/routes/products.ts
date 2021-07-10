@@ -95,9 +95,15 @@ const products: FastifyPluginCallback = async function (
     return res.status(200).send(categories);
   });
 
+const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
+  return lang == 'ru' ? nameRu.split('_')[0] : nameUk.split('_')[0];
+}
+
   fastify.get("/menu", {}, async (_req: any, res: any) => {
     const categories: any = await getAllCategories();
-    const data: Array<any> = [];
+    const lang = _req.cookies.lang ?? 'uk';
+    // Add postClientRequest hook on cookie lang
+    const data: {[key: string]: any} = {};
     if (!categories) {
       return res.status(400).send(new RequestError(
             400,
@@ -107,32 +113,20 @@ const products: FastifyPluginCallback = async function (
           ));
     }
     for (const category of categories) {
+      let tempCategoryName = getNameByLang(category.name_ru, category.name_uk, lang);
+      data[tempCategoryName] = {};
       let subcategories: Subcategory[] = await getAllSubcategoriesByCategoryId(category.id);
-      let subcategoriesData: Array<any> = [];
+      // let subcategoriesData: Array<any> = [];
       for (const subcategory of subcategories) {
+        let tempSubCategoryName = getNameByLang(subcategory.name_ru, subcategory.name_uk, lang);
+        data[tempCategoryName][tempSubCategoryName] = {}
         let products = await getAllProductsBySubcategoryId(subcategory.id);
-        let productsData: Array<any> = [];
+        // let productsData: Array<any> = [];
         for(const product of products) {
-          productsData.push({
-            nameRu: product.nameRu,
-            nameUk: product.nameUk,
-          });
+          let tempProductName = getNameByLang(product.name_ru, product.name_uk, lang);
+          data[tempCategoryName][tempSubCategoryName][tempProductName] = product.id;
         }
-        subcategoriesData.push({
-          subcategory: {
-            nameRu: subcategory.nameRu,
-            nameUk: subcategory.nameUk,
-            products: productsData,
-          },
-        });
       }
-      data.push({
-        category: {
-          nameRu: category.nameRu,
-          nameUk: category.nameUk,
-          subcategories: subcategoriesData,
-        },
-      });
     }
     return res.status(200).send(data);
   });

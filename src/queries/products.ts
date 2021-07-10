@@ -34,7 +34,7 @@ const updateProductNameRu = async function (productId: number, nameRu: string) {
       id: productId,
     },
     data: {
-      nameRu: nameRu,
+      name_ru: nameRu,
     },
   });
 };
@@ -45,7 +45,7 @@ const updateProductNameUk = async function (productId: number, nameUk: string) {
       id: productId,
     },
     data: {
-      nameUk: nameUk,
+      name_uk: nameUk,
     },
   });
 };
@@ -59,7 +59,7 @@ const updateProductTitleRu = async function (
       id: productId,
     },
     data: {
-      titleRu: titleRu,
+      title_ru: titleRu,
     },
   });
 };
@@ -73,7 +73,7 @@ const updateProductTitleUk = async function (
       id: productId,
     },
     data: {
-      titleUk: titleUk,
+      title_uk: titleUk,
     },
   });
 };
@@ -101,7 +101,7 @@ const updateProductLongCharsRu = async function (
       id: productId,
     },
     data: {
-      longCharsRu: longCharsRu,
+      longChars_ru: longCharsRu,
     },
   });
 };
@@ -115,7 +115,7 @@ const updateProductLongCharsUk = async function (
       id: productId,
     },
     data: {
-      longCharsUk: longCharsUk,
+      longChars_uk: longCharsUk,
     },
   });
 };
@@ -129,7 +129,7 @@ const updateProductDescriptionRu = async function (
       id: productId,
     },
     data: {
-      descriptionRu: descriptionRu,
+      description_ru: descriptionRu,
     },
   });
 };
@@ -143,7 +143,7 @@ const updateProductDescriptionUk = async function (
       id: productId,
     },
     data: {
-      descriptionUk: descriptionUk,
+      description_uk: descriptionUk,
     },
   });
 };

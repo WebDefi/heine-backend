@@ -1,5 +1,6 @@
 import fastify from "fastify";
 import fastifyCors from "fastify-cors";
+import cookie from "fastify-cookie";
 import { join, resolve } from "path";
 import accessories from "./routes/accessories";
 import news from "./routes/news";
@@ -13,6 +14,9 @@ server.register(accessories, { prefix: "/accessories" });
 server.register(news, { prefix: "/news" });
 server.register(require("fastify-static"), {
   root: join(resolve(__dirname, "../"), "static")
+});
+server.register(cookie, {
+  secret: "aloha",
 });
 
 export default server;

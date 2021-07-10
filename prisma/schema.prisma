@@ -9,10 +9,10 @@ generator client {
 
 model Category {
   id         Int     @id @default(autoincrement())
-  nameRu     String  @unique @map("name_ru")
-  nameUk     String  @unique @map("name_uk")
-  titleRu    String  @map("title_ru")
-  titleUk    String  @map("title_uk")
+  name_ru    String  @unique @map("name_ru")
+  name_uk    String  @unique @map("name_uk")
+  title_ru   String  @map("title_ru")
+  title_uk   String  @map("title_uk")
   pictureUrl String? @map("picture_url")
 
   subcategories Subcategory[]
@@ -22,10 +22,10 @@ model Category {
 
 model Subcategory {
   id         Int     @id @default(autoincrement())
-  nameRu     String  @unique @map("name_ru")
-  nameUk     String  @unique @map("name_uk")
-  titleRu    String  @map("title_ru")
-  titleUk    String  @map("title_uk")
+  name_ru    String  @unique @map("name_ru")
+  name_uk    String  @unique @map("name_uk")
+  title_ru   String  @map("title_ru")
+  title_uk   String  @map("title_uk")
   pictureUrl String? @map("picture_url")
 
   categoryId Int      @map("category_id")
@@ -36,19 +36,19 @@ model Subcategory {
 }
 
 model Product {
-  id            Int      @id @default(autoincrement())
-  nameRu        String   @unique @map("name_ru")
-  nameUk        String   @unique @map("name_uk")
-  titleRu       String   @map("title_ru")
-  titleUk       String   @map("title_uk")
-  descriptionRu String?  @map("description_ru")
-  descriptionUk String?  @map("description_uk")
-  shortChars    Json     @map("short_characteristics")
-  longCharsRu   String   @map("long_charcteristics_ru")
-  longCharsUk   String   @map("long_charcteristics_uk")
-  configuration Json
-  documents     String[]
-  faqs          Json[]
+  id             Int      @id @default(autoincrement())
+  name_ru        String   @unique @map("name_ru")
+  name_uk        String   @unique @map("name_uk")
+  title_ru       String   @map("title_ru")
+  title_uk       String   @map("title_uk")
+  description_ru String?  @map("description_ru")
+  description_uk String?  @map("description_uk")
+  shortChars     Json     @map("short_characteristics")
+  longChars_ru   String   @map("long_charcteristics_ru")
+  longChars_uk   String   @map("long_charcteristics_uk")
+  configuration  Json
+  documents      String[]
+  faqs           Json[]
 
   subcategoryId Int
   subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
@@ -58,10 +58,10 @@ model Product {
 
 model AccessoryCategory {
   id         Int     @id @default(autoincrement())
-  nameRu     String  @unique @map("name_ru")
-  nameUk     String  @unique @map("name_uk")
-  titleRu    String  @map("title_ru")
-  titleUk    String  @map("title_uk")
+  name_ru    String  @unique @map("name_ru")
+  name_uk    String  @unique @map("name_uk")
+  title_ru   String  @map("title_ru")
+  title_uk   String  @map("title_uk")
   pictureUrl String? @map("picture_url")
 
   accessorySubcategory AccessorySubcategory[]
@@ -71,10 +71,10 @@ model AccessoryCategory {
 
 model AccessorySubcategory {
   id         Int     @id @default(autoincrement())
-  nameRu     String  @unique @map("name_ru")
-  nameUk     String  @unique @map("name_uk")
-  titleRu    String  @map("title_ru")
-  titleUk    String  @map("title_uk")
+  name_ru    String  @unique @map("name_ru")
+  name_uk    String  @unique @map("name_uk")
+  title_ru   String  @map("title_ru")
+  title_uk   String  @map("title_uk")
   pictureUrl String? @map("picture_url")
 
   categoryId Int               @map("category_id")
@@ -86,19 +86,19 @@ model AccessorySubcategory {
 }
 
 model Accessory {
-  id            Int      @id @default(autoincrement())
-  nameRu        String   @unique @map("name_ru")
-  nameUk        String   @unique @map("name_uk")
-  titleRu       String   @map("title_ru")
-  titleUk       String   @map("title_uk")
-  descriptionRu String?  @map("description_ru")
-  descriptionUk String?  @map("description_uk")
-  shortChars    Json     @map("short_characteristics")
-  longCharsRu   String   @map("long_charcteristics_ru")
-  longCharsUk   String   @map("long_charcteristics_uk")
-  configuration Json
-  documents     String[]
-  faq           Json[]
+  id             Int      @id @default(autoincrement())
+  name_ru        String   @unique @map("name_ru")
+  name_uk        String   @unique @map("name_uk")
+  title_ru       String   @map("title_ru")
+  title_uk       String   @map("title_uk")
+  description_ru String?  @map("description_ru")
+  description_uk String?  @map("description_uk")
+  shortChars     Json     @map("short_characteristics")
+  longChars_ru   String   @map("long_charcteristics_ru")
+  longChars_uk   String   @map("long_charcteristics_uk")
+  configuration  Json
+  documents      String[]
+  faqs           Json[]
 
   accessorySubcategoryId Int                  @map("accessory_subcategory_id")
   accessoryCategory      AccessorySubcategory @relation(fields: [accessorySubcategoryId], references: [id])

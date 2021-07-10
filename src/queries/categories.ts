@@ -34,7 +34,7 @@ const updateCategoryNameRu = async function (
       id: categoryId,
     },
     data: {
-      nameRu: nameRu,
+      name_ru: nameRu,
     },
   });
 };
@@ -48,7 +48,7 @@ const updateCategoryNameUk = async function (
       id: categoryId,
     },
     data: {
-      nameUk: nameUk,
+      name_uk: nameUk,
     },
   });
 };
@@ -62,7 +62,7 @@ const updateCategoryTitleRu = async function (
       id: categoryId,
     },
     data: {
-      titleRu: titleRu,
+      title_ru: titleRu,
     },
   });
 };
@@ -76,7 +76,7 @@ const updateCategoryTitleUk = async function (
       id: categoryId,
     },
     data: {
-      titleUk: titleUk,
+      title_uk: titleUk,
     },
   });
 };

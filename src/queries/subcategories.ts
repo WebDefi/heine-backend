@@ -38,7 +38,7 @@ const updateSubcategoryNameRu = async function (
       id: subcategoryId,
     },
     data: {
-      nameRu: nameRu,
+      name_ru: nameRu,
     },
   });
 };
@@ -52,7 +52,7 @@ const updateSubcategoryNameUk = async function (
       id: subcategoryId,
     },
     data: {
-      nameUk: nameUk,
+      name_uk: nameUk,
     },
   });
 };
@@ -66,7 +66,7 @@ const updateSubcategoryTitleRu = async function (
       id: subcategoryId,
     },
     data: {
-      titleRu: titleRu,
+      title_ru: titleRu,
     },
   });
 };
@@ -80,7 +80,7 @@ const updateSubcategoryTitleUk = async function (
       id: subcategoryId,
     },
     data: {
-      titleUk: titleUk,
+      title_uk: titleUk,
     },
   });
 };
