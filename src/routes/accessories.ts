@@ -1,5 +1,6 @@
 import { Accessory, AccessoryCategory, AccessorySubcategory } from "@prisma/client";
 import { FastifyInstance, FastifyPluginCallback, FastifyReply } from "fastify";
+import { langParse } from "../utils/langHandler";
 import {
   createAccessory,
   deleteAccessory,
@@ -41,6 +42,7 @@ import {
 } from "../queries/accessorySubcategories";
 import { ErrorMessages, ErrorTypes, ObjectTypes } from "../utils/constants";
 import { RequestError } from "../utils/requestError";
+import { onSendGenericLangHandler } from "./onSendLangHook";
 
 const accessories: FastifyPluginCallback = async function (
   fastify: FastifyInstance
@@ -84,7 +86,7 @@ const accessories: FastifyPluginCallback = async function (
     return res.status(200).send(accessory);
   });
 
-  fastify.get("/", {}, async (_req, res) => {
+  fastify.get("/", {onSend: onSendGenericLangHandler}, async (_req, res) => {
     const accessoryCategories: any = await getAllAccessoryCategories();
     if (!accessoryCategories) {
       res.send(new RequestError(
@@ -98,7 +100,7 @@ const accessories: FastifyPluginCallback = async function (
   });
 
 const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
-  return lang == 'ru' ? nameRu.split('_')[0] : nameUk.split('_')[0];
+  return lang == 'ru' ? nameRu : nameUk;
 }
 
   fastify.get("/menu", {}, async (_req: any, res: any) => {
@@ -132,6 +134,7 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
   });
 
   fastify.get("/accessoryCategory/:categoryId", {}, async (req: any, res: any) => {
+    const lang = req.cookies.lang ?? "uk";
     const accessorySubcategories: any = await getAllAccessorySubcategoriesByCategoryId(
       parseInt(req.params.categoryId)
     );
@@ -144,16 +147,20 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
           ));
     }
     for (let i = 0; i < accessorySubcategories.length; i++) {
+      accessorySubcategories[i] = langParse(accessorySubcategories[i], lang);
+      let accessories = await getAllAccessoriesByAccessorySubcategoryId(accessorySubcategories[i].id);
+      accessories.forEach((item, key, array) => array[key] = langParse(item, lang));
       accessorySubcategories[i] = { 
         subcategory: accessorySubcategories[i], 
-        products: await getAllAccessoriesByAccessorySubcategoryId(accessorySubcategories[i].id) 
+        products: accessories,
       }
     }
     return res.status(200).send({ accessorySubcategories });
   });
 
   fastify.get("/accessorySubcategory/:subcategoryId", {}, async (req: any, res: FastifyReply) => {
-      const accessorySubcategory: AccessorySubcategory | null = await getAccessorySubcategoryById(parseInt(req.params.subcategoryId));
+      const lang = req.cookies.lang ?? "uk";
+      let accessorySubcategory: AccessorySubcategory | null = await getAccessorySubcategoryById(parseInt(req.params.subcategoryId));
       if (!accessorySubcategory) {
         return res.status(400).send(new RequestError(
             400,
@@ -162,6 +169,7 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
             ObjectTypes.accessorySubcategory,
           ));
       }
+      accessorySubcategory = langParse(accessorySubcategory, lang);
       const accessories: Accessory[] = await getAllAccessoriesByAccessorySubcategoryId(parseInt(req.params.subcategoryId));
       if (!accessories) {
         return res.status(400).send(new RequestError(
@@ -171,23 +179,26 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
             ObjectTypes.accessory,
           ));
       }
+      accessories.forEach((item, key, array) => array[key] = langParse(item, lang));
       return res.status(200).send({ accessorySubcategory, accessories });
     }
   );
 
   fastify.get("/accessory/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-      const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-      if (!accessory) {
-        return res.status(400).send(new RequestError(
-          400, 
-          ErrorTypes.notFoundError, 
-          ErrorMessages.notFoundError,
-          ObjectTypes.accessory,
-          ));
-      }
-      return res.status(200).send(accessory);
+    const lang = req.cookies.lang ?? "uk";
+    let accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
+    if (!accessory) {
+      return res.status(400).send(new RequestError(
+        400, 
+        ErrorTypes.notFoundError, 
+        ErrorMessages.notFoundError,
+        ObjectTypes.accessory,
+        ));
     }
-  );
+    accessory = langParse(accessory, lang);
+    return res.status(200).send(accessory);
+  }
+);
 
   fastify.patch("/accessoryCategory/update/nameRu/:categoryId", {}, async (req: any, res: FastifyReply) => {
     const accessoryCategory: AccessoryCategory | null = await getAccessoryCategoryById(parseInt(req.params.categoryId));
