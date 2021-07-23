@@ -83,13 +83,7 @@ const products: FastifyPluginCallback = async function (
       );
 
       if (result.error) {
-        sendError(
-          res,
-          400,
-          ErrorTypes.invalidCreationDataError,
-          ErrorMessages.invalidCreationDataError,
-          ObjectTypes.subcategory
-        );
+        return res.status(400).send({ error: result.err });
       }
     }
     return res.status(200).send(category);
