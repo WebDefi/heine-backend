@@ -11,12 +11,13 @@ class FileService {
       return { error: err };
     }
   }
-  public async deleteFile(filePath: PathLike, writeErrorMethod: any) {
+  public async deleteFile(filePath: PathLike) {
     try {
       await unlink(filePath);
+      return true;
     } catch (err) {
       console.log(err);
-      return writeErrorMethod();
+      return { error: err };
     }
   }
 }

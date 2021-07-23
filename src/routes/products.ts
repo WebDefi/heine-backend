@@ -77,13 +77,13 @@ const products: FastifyPluginCallback = async function (
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
-          `static/img/${category.id}/${fileName}`
+          `static/img/category/${category.id}/${fileName}`
         ),
         imgBase64
       );
 
       if (result.error) {
-        return res.status(400).send({ error: result.err });
+        return res.status(400).send(result);
       }
     }
     return res.status(200).send(category);
@@ -108,18 +108,12 @@ const products: FastifyPluginCallback = async function (
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
-          `static/img/${subcategory.id}/${subcategory.pictureUrl}`
+          `static/img/subcategory/${subcategory.id}/${subcategory.pictureUrl}`
         ),
         imgBase64
       );
       if (result.error) {
-        sendError(
-          res,
-          400,
-          ErrorTypes.invalidCreationDataError,
-          ErrorMessages.invalidCreationDataError,
-          ObjectTypes.subcategory
-        );
+        return res.status(400).send(result);
       }
     }
     return res.status(200).send(subcategory);
@@ -150,18 +144,12 @@ const products: FastifyPluginCallback = async function (
         const result: any = await fileService.createFile(
           join(
             resolve(__dirname, "../../"),
-            `static/img/${product.id}/${imgName}`
+            `static/img/product/${product.id}/${imgName}`
           ),
           imgBase64
         );
         if (result.error) {
-          sendError(
-            res,
-            400,
-            ErrorTypes.invalidCreationDataError,
-            ErrorMessages.invalidCreationDataError,
-            ObjectTypes.subcategory
-          );
+          return res.status(400).send(result);
         }
       }
     }
@@ -1224,23 +1212,18 @@ const products: FastifyPluginCallback = async function (
             )
           );
       } else {
-        await fileService.deleteFile(
+        const result: any = await fileService.deleteFile(
           join(
             resolve(
               __dirname,
               "../../",
-              `/static/img/${category.id}/${category.pictureUrl}`
+              `/static/img/category/${category.id}/${category.pictureUrl}`
             )
-          ),
-          () =>
-            sendError(
-              res,
-              400,
-              ErrorTypes.invalidDeleteDataError,
-              ErrorMessages.invalidDeleteDataError,
-              ObjectTypes.category
-            )
+          )
         );
+        if (result.error) {
+          return res.status(400).send(result);
+        }
       }
       return res.status(204).send();
     }
@@ -1265,23 +1248,18 @@ const products: FastifyPluginCallback = async function (
             )
           );
       } else {
-        await fileService.deleteFile(
+        const result: any = await fileService.deleteFile(
           join(
             resolve(
               __dirname,
               "../../",
-              `/static/img/${subcategory.id}/${subcategory.pictureUrl}`
+              `/static/img/subcategory/${subcategory.id}/${subcategory.pictureUrl}`
             )
-          ),
-          () =>
-            sendError(
-              res,
-              400,
-              ErrorTypes.invalidDeleteDataError,
-              ErrorMessages.invalidDeleteDataError,
-              ObjectTypes.subcategory
-            )
+          )
         );
+        if (result.error) {
+          return res.status(400).status(result);
+        }
       }
       return res.status(204).send();
     }
@@ -1305,23 +1283,18 @@ const products: FastifyPluginCallback = async function (
           );
       } else {
         for (let imageName of product.documents) {
-          await fileService.deleteFile(
+          let tempResult: any = await fileService.deleteFile(
             join(
               resolve(
                 __dirname,
                 "../../",
-                `/static/img/${product.id}/${imageName}`
+                `/static/img/product/${product.id}/${imageName}`
               )
-            ),
-            () =>
-              sendError(
-                res,
-                400,
-                ErrorTypes.invalidCreationDataError,
-                ErrorMessages.invalidCreationDataError,
-                ObjectTypes.product
-              )
+            )
           );
+          if (tempResult.error) {
+            return res.status(400).send(tempResult);
+          }
         }
       }
       return res.status(204).send();
