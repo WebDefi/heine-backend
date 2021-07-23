@@ -1,16 +1,13 @@
 import { PathLike } from "fs";
-import { writeFile, unlink } from "fs/promises";
+import { outputFile, unlink } from "fs-extra";
 
 class FileService {
-  public async createFile(
-    filePath: PathLike,
-    base64Data: string
-  ) {
+  public async createFile(filePath: string, base64Data: string) {
     try {
-      return await writeFile(filePath, base64Data, "base64");
+      return await outputFile(filePath, base64Data, "base64");
     } catch (err) {
       console.log(err);
-      return {error: err}
+      return { error: err };
     }
   }
   public async deleteFile(filePath: PathLike, writeErrorMethod: any) {
