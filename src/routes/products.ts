@@ -41,8 +41,7 @@ import {
 import { Category, Product, Subcategory } from ".prisma/client";
 import { onSendGenericLangHandler } from "./onSendLangHook";
 import { langParse } from "../utils/langHandler";
-import { join } from "path";
-import { resolve } from "node:path";
+import { join, resolve } from "path";
 import fileService from "src/utils/fileService";
 
 const sendError = (
