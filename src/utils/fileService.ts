@@ -1,5 +1,5 @@
 import { PathLike } from "fs";
-import { writeFile, unlink } from "fs/promises";
+import fs from "fs";
 
 class FileService {
   public async createFile(
@@ -8,7 +8,7 @@ class FileService {
     writeErrorMethod: any
   ) {
     try {
-      await writeFile(filePath, base64Data, "base64");
+      await fs.promises.writeFile(filePath, base64Data, "base64");
     } catch (err) {
       console.log(err);
       return writeErrorMethod();
@@ -16,7 +16,7 @@ class FileService {
   }
   public async deleteFile(filePath: PathLike, writeErrorMethod: any) {
     try {
-      await unlink(filePath);
+      await fs.promises.unlink(filePath);
     } catch (err) {
       console.log(err);
       return writeErrorMethod();
