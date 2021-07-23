@@ -60,6 +60,8 @@ const products: FastifyPluginCallback = async function (
   fastify: FastifyInstance
 ) {
   fastify.put("/category/create", {}, async (req: any, res: any) => {
+    const imgBase64 = req.body.picture64;
+    delete req.body["picture64"]
     const category = await createCategory(req.body);
 
     if (!category) {
@@ -71,7 +73,6 @@ const products: FastifyPluginCallback = async function (
         ObjectTypes.category
       );
     } else {
-      const imgBase64 = req.body.picture64;
       const fileName = req.body.pictureUrl;
       await fileService.createFile(
         join(
@@ -93,6 +94,8 @@ const products: FastifyPluginCallback = async function (
   });
 
   fastify.put("/subcategory/create", {}, async (req: any, res: any) => {
+    const imgBase64 = req.body.picture64;
+    delete req.body["picture64"]
     const subcategory = await createSubcategory(req.body);
     if (!subcategory) {
       return res
@@ -106,7 +109,6 @@ const products: FastifyPluginCallback = async function (
           )
         );
     } else {
-      const imgBase64 = req.body.picture64;
       await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
