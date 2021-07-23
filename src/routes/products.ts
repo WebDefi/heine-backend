@@ -1214,11 +1214,8 @@ const products: FastifyPluginCallback = async function (
       } else {
         const result: any = await fileService.deleteFile(
           join(
-            resolve(
-              __dirname,
-              "../../",
-              `/static/img/category/${category.id}/${category.pictureUrl}`
-            )
+            resolve(__dirname, "../../"),
+            `/static/img/category/${category.id}/${category.pictureUrl}`
           )
         );
         if (result.error) {
@@ -1250,11 +1247,8 @@ const products: FastifyPluginCallback = async function (
       } else {
         const result: any = await fileService.deleteFile(
           join(
-            resolve(
-              __dirname,
-              "../../",
-              `/static/img/subcategory/${subcategory.id}/${subcategory.pictureUrl}`
-            )
+            resolve(__dirname, "../../"),
+            `/static/img/subcategory/${subcategory.id}/${subcategory.pictureUrl}`
           )
         );
         if (result.error) {
@@ -1285,11 +1279,8 @@ const products: FastifyPluginCallback = async function (
         for (let imageName of product.documents) {
           let tempResult: any = await fileService.deleteFile(
             join(
-              resolve(
-                __dirname,
-                "../../",
-                `/static/img/product/${product.id}/${imageName}`
-              )
+              resolve(__dirname, "../../"),
+              `/static/img/product/${product.id}/${imageName}`
             )
           );
           if (tempResult.error) {
