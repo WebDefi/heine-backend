@@ -61,7 +61,7 @@ const products: FastifyPluginCallback = async function (
 ) {
   fastify.put("/category/create", {}, async (req: any, res: any) => {
     const imgBase64 = req.body.picture64;
-    delete req.body["picture64"]
+    delete req.body["picture64"];
     const category = await createCategory(req.body);
 
     if (!category) {
@@ -74,28 +74,30 @@ const products: FastifyPluginCallback = async function (
       );
     } else {
       const fileName = req.body.pictureUrl;
-      await fileService.createFile(
+      const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
           `static/img/${category.id}/${fileName}`
         ),
-        imgBase64,
-        () =>
-          sendError(
-            res,
-            400,
-            ErrorTypes.invalidCreationDataError,
-            ErrorMessages.invalidCreationDataError,
-            ObjectTypes.category
-          )
+        imgBase64
       );
+
+      if (result.error) {
+        sendError(
+          res,
+          400,
+          ErrorTypes.invalidCreationDataError,
+          ErrorMessages.invalidCreationDataError,
+          ObjectTypes.subcategory
+        );
+      }
     }
     return res.status(200).send(category);
   });
 
   fastify.put("/subcategory/create", {}, async (req: any, res: any) => {
     const imgBase64 = req.body.picture64;
-    delete req.body["picture64"]
+    delete req.body["picture64"];
     const subcategory = await createSubcategory(req.body);
     if (!subcategory) {
       return res
@@ -109,21 +111,22 @@ const products: FastifyPluginCallback = async function (
           )
         );
     } else {
-      await fileService.createFile(
+      const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
           `static/img/${subcategory.id}/${subcategory.pictureUrl}`
         ),
-        imgBase64,
-        () =>
-          sendError(
-            res,
-            400,
-            ErrorTypes.invalidCreationDataError,
-            ErrorMessages.invalidCreationDataError,
-            ObjectTypes.subcategory
-          )
+        imgBase64
       );
+      if (result.error) {
+        sendError(
+          res,
+          400,
+          ErrorTypes.invalidCreationDataError,
+          ErrorMessages.invalidCreationDataError,
+          ObjectTypes.subcategory
+        );
+      }
     }
     return res.status(200).send(subcategory);
   });
@@ -150,21 +153,22 @@ const products: FastifyPluginCallback = async function (
     } else {
       for (let imgName in imageData) {
         const imgBase64 = imageData[imgName];
-        await fileService.createFile(
+        const result: any = await fileService.createFile(
           join(
             resolve(__dirname, "../../"),
             `static/img/${product.id}/${imgName}`
           ),
-          imgBase64,
-          () =>
-            sendError(
-              res,
-              400,
-              ErrorTypes.invalidCreationDataError,
-              ErrorMessages.invalidCreationDataError,
-              ObjectTypes.product
-            )
+          imgBase64
         );
+        if (result.error) {
+          sendError(
+            res,
+            400,
+            ErrorTypes.invalidCreationDataError,
+            ErrorMessages.invalidCreationDataError,
+            ObjectTypes.subcategory
+          );
+        }
       }
     }
     return res.status(200).send(product);

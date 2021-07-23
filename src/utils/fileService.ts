@@ -4,14 +4,13 @@ import { writeFile, unlink } from "fs/promises";
 class FileService {
   public async createFile(
     filePath: PathLike,
-    base64Data: string,
-    writeErrorMethod: any
+    base64Data: string
   ) {
     try {
-      await writeFile(filePath, base64Data, "base64");
+      return await writeFile(filePath, base64Data, "base64");
     } catch (err) {
       console.log(err);
-      return writeErrorMethod();
+      return {error: err}
     }
   }
   public async deleteFile(filePath: PathLike, writeErrorMethod: any) {
