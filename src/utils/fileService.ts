@@ -1,5 +1,5 @@
-import { PathLike } from "node:fs";
-import { writeFile, unlink } from "node:fs/promises";
+import { PathLike } from "fs";
+import { writeFile, unlink } from "fs/promises";
 
 class FileService {
   public async createFile(
