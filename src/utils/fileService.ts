@@ -4,7 +4,8 @@ import { outputFile, unlink } from "fs-extra";
 class FileService {
   public async createFile(filePath: string, base64Data: string) {
     try {
-      return await outputFile(filePath, base64Data, "base64");
+      await outputFile(filePath, base64Data, "base64");
+      return true;
     } catch (err) {
       console.log(err);
       return { error: err };
