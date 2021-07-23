@@ -1,5 +1,6 @@
 import { PathLike } from "fs";
 import { outputFile, unlink } from "fs-extra";
+import { resolve } from "path";
 
 class FileService {
   public async createFile(filePath: string, base64Data: string) {
@@ -11,9 +12,9 @@ class FileService {
       return { error: err };
     }
   }
-  public async deleteFile(filePath: PathLike) {
+  public async deleteFile(filePath: string) {
     try {
-      await unlink(filePath);
+      await unlink(resolve(filePath));
       return true;
     } catch (err) {
       console.log(err);
