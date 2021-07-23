@@ -1,4 +1,3 @@
-import { PathLike } from "fs";
 import { outputFile, unlink } from "fs-extra";
 import { resolve } from "path";
 
