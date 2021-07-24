@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { AccessorySubcategory, PrismaClient } from "@prisma/client";
 import { deleteAccessoriesByAccessorySubcategoryId } from "./accessories";
 
 const prisma = new PrismaClient();
@@ -33,72 +33,18 @@ const getAllAccessorySubcategoriesByCategoryId = async function (
   });
 };
 
-const updateAccessorySubcategoryNameRu = async function (
-  accessorySubcategoryId: number,
-  nameRu: string
-) {
-  return await prisma.accessorySubcategory.update({
+const updateAccessorySubcategory = async function (subcategoryId: number, data: any) {
+  const subcategory: AccessorySubcategory | null = await getAccessorySubcategoryById(subcategoryId);
+  return await prisma.subcategory.update({
     where: {
-      id: accessorySubcategoryId,
+      id: subcategoryId,
     },
     data: {
-      name_ru: nameRu,
-    },
-  });
-};
-
-const updateAccessorySubcategoryNameUk = async function (
-  accessorySubcategoryId: number,
-  nameUk: string
-) {
-  return await prisma.accessorySubcategory.update({
-    where: {
-      id: accessorySubcategoryId,
-    },
-    data: {
-      name_uk: nameUk,
-    },
-  });
-};
-
-const updateAccessorySubcategoryTitleRu = async function (
-  accessorySubcategoryId: number,
-  titleRu: string
-) {
-  return await prisma.accessorySubcategory.update({
-    where: {
-      id: accessorySubcategoryId,
-    },
-    data: {
-      title_ru: titleRu,
-    },
-  });
-};
-
-const updateAccessorySubcategoryTitleUk = async function (
-  accessorySubcategoryId: number,
-  titleUk: string
-) {
-  return await prisma.accessorySubcategory.update({
-    where: {
-      id: accessorySubcategoryId,
-    },
-    data: {
-      title_uk: titleUk,
-    },
-  });
-};
-
-const updateAccessorySubcategoryPictureUrl = async function (
-  accessorySubcategoryId: number,
-  pictureUrl: string
-) {
-  return await prisma.accessorySubcategory.update({
-    where: {
-      id: accessorySubcategoryId,
-    },
-    data: {
-      pictureUrl: pictureUrl,
+      name_ru: data.name_ru ?? subcategory?.name_ru,
+      name_uk: data.name_uk ?? subcategory?.name_uk,
+      title_ru: data.title_ru ?? subcategory?.title_ru,
+      title_uk: data.title_uk ?? subcategory?.title_uk,
+      pictureUrl: data.pictureUrl ?? subcategory?.pictureUrl,
     },
   });
 };
@@ -134,11 +80,7 @@ export {
   createAccessorySubcategory,
   getAccessorySubcategoryById,
   getAllAccessorySubcategoriesByCategoryId,
-  updateAccessorySubcategoryNameRu,
-  updateAccessorySubcategoryNameUk,
-  updateAccessorySubcategoryTitleRu,
-  updateAccessorySubcategoryTitleUk,
-  updateAccessorySubcategoryPictureUrl,
+  updateAccessorySubcategory,
   deleteAccessorySubcategory,
   deleteAccessorySubcategoriesByAccessoryCategoryId,
 };

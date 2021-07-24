@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Subcategory } from "@prisma/client";
 import { deleteProductsBySubcategoryId } from "./products";
 
 const prisma = new PrismaClient();
@@ -99,6 +99,22 @@ const updateSubcategoryPictureUrl = async function (
   });
 };
 
+const updateSubcategory = async function (subcategoryId: number, data: any) {
+  const subcategory: Subcategory | null = await getSubcategoryById(subcategoryId);
+  return await prisma.subcategory.update({
+    where: {
+      id: subcategoryId,
+    },
+    data: {
+      name_ru: data.name_ru ?? subcategory?.name_ru,
+      name_uk: data.name_uk ?? subcategory?.name_uk,
+      title_ru: data.title_ru ?? subcategory?.title_ru,
+      title_uk: data.title_uk ?? subcategory?.title_uk,
+      pictureUrl: data.pictureUrl ?? subcategory?.pictureUrl,
+    },
+  });
+};
+
 const deleteSubcategory = async function (subcategoryId: number) {
   await deleteProductsBySubcategoryId(subcategoryId);
   return await prisma.subcategory.delete({
@@ -114,7 +130,6 @@ const deleteSubcategoriesByCategoryId = async function (categoryId: number) {
       categoryId: categoryId,
     },
   });
-  console.log(subcategories);
   for(const subcategory of subcategories) {
     deleteProductsBySubcategoryId(subcategory.id);
   };
@@ -129,11 +144,7 @@ export {
   createSubcategory,
   getSubcategoryById,
   getAllSubcategoriesByCategoryId,
-  updateSubcategoryNameRu,
-  updateSubcategoryNameUk,
-  updateSubcategoryTitleRu,
-  updateSubcategoryTitleUk,
-  updateSubcategoryPictureUrl,
+  updateSubcategory,
   deleteSubcategory,
   deleteSubcategoriesByCategoryId,
 };

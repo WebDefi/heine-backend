@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Category, PrismaClient } from "@prisma/client";
 import { deleteSubcategoriesByCategoryId } from "./subcategories";
 
 const prisma = new PrismaClient();
@@ -25,72 +25,18 @@ const getAllCategories = async function () {
   return await prisma.category.findMany({});
 };
 
-const updateCategoryNameRu = async function (
-  categoryId: number,
-  nameRu: string
-) {
+const updateCategory = async function (categoryId: number, data: any) {
+  const category: Category | null = await getCategoryById(categoryId);
   return await prisma.category.update({
     where: {
       id: categoryId,
     },
     data: {
-      name_ru: nameRu,
-    },
-  });
-};
-
-const updateCategoryNameUk = async function (
-  categoryId: number,
-  nameUk: string
-) {
-  return await prisma.category.update({
-    where: {
-      id: categoryId,
-    },
-    data: {
-      name_uk: nameUk,
-    },
-  });
-};
-
-const updateCategoryTitleRu = async function (
-  categoryId: number,
-  titleRu: string
-) {
-  return await prisma.category.update({
-    where: {
-      id: categoryId,
-    },
-    data: {
-      title_ru: titleRu,
-    },
-  });
-};
-
-const updateCategoryTitleUk = async function (
-  categoryId: number,
-  titleUk: string
-) {
-  return await prisma.category.update({
-    where: {
-      id: categoryId,
-    },
-    data: {
-      title_uk: titleUk,
-    },
-  });
-};
-
-const updateCategoryPictureUrl = async function (
-  categoryId: number,
-  pictureUrl: string
-) {
-  return await prisma.category.update({
-    where: {
-      id: categoryId,
-    },
-    data: {
-      pictureUrl: pictureUrl,
+      name_ru: data.name_ru ?? category?.name_ru,
+      name_uk: data.name_uk ?? category?.name_uk,
+      title_ru: data.title_ru ?? category?.title_ru,
+      title_uk: data.title_uk ?? category?.title_uk,
+      pictureUrl: data.pictureUrl ?? category?.pictureUrl,
     },
   });
 };
@@ -108,10 +54,6 @@ export {
   createCategory,
   getCategoryById,
   getAllCategories,
-  updateCategoryNameRu,
-  updateCategoryNameUk,
-  updateCategoryTitleRu,
-  updateCategoryTitleUk,
-  updateCategoryPictureUrl,
+  updateCategory,
   deleteCategory,
 };

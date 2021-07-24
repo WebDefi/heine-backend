@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { AccessoryCategory, PrismaClient } from "@prisma/client";
 import { deleteAccessorySubcategoriesByAccessoryCategoryId } from "./accessorySubcategories";
 
 const prisma = new PrismaClient();
@@ -25,72 +25,18 @@ const getAllAccessoryCategories = async function () {
   return await prisma.accessoryCategory.findMany({});
 };
 
-const updateAccessoryCategoryNameRu = async function (
-  accessoryCategoryId: number,
-  nameRu: string
-) {
+const updateAccessoryCategory = async function (categoryId: number, data: any) {
+  const category: AccessoryCategory | null = await getAccessoryCategoryById(categoryId);
   return await prisma.accessoryCategory.update({
     where: {
-      id: accessoryCategoryId,
+      id: categoryId,
     },
     data: {
-      name_ru: nameRu,
-    },
-  });
-};
-
-const updateAccessoryCategoryNameUk = async function (
-  accessoryCategoryId: number,
-  nameUk: string
-) {
-  return await prisma.accessoryCategory.update({
-    where: {
-      id: accessoryCategoryId,
-    },
-    data: {
-      name_uk: nameUk,
-    },
-  });
-};
-
-const updateAccessoryCategoryTitleRu = async function (
-  accessoryCategoryId: number,
-  titleRu: string
-) {
-  return await prisma.accessoryCategory.update({
-    where: {
-      id: accessoryCategoryId,
-    },
-    data: {
-      title_ru: titleRu,
-    },
-  });
-};
-
-const updateAccessoryCategoryTitleUk = async function (
-  accessoryCategoryId: number,
-  titleUk: string
-) {
-  return await prisma.accessoryCategory.update({
-    where: {
-      id: accessoryCategoryId,
-    },
-    data: {
-      title_uk: titleUk,
-    },
-  });
-};
-
-const updateAccessoryCategoryPictureUrl = async function (
-  accessoryCategoryId: number,
-  pictureUrl: string
-) {
-  return await prisma.accessoryCategory.update({
-    where: {
-      id: accessoryCategoryId,
-    },
-    data: {
-      pictureUrl: pictureUrl,
+      name_ru: data.name_ru ?? category?.name_ru,
+      name_uk: data.name_uk ?? category?.name_uk,
+      title_ru: data.title_ru ?? category?.title_ru,
+      title_uk: data.title_uk ?? category?.title_uk,
+      pictureUrl: data.pictureUrl ?? category?.pictureUrl,
     },
   });
 };
@@ -108,10 +54,6 @@ export {
   createAccessoryCategory,
   getAccessoryCategoryById,
   getAllAccessoryCategories,
-  updateAccessoryCategoryNameRu,
-  updateAccessoryCategoryNameUk,
-  updateAccessoryCategoryTitleRu,
-  updateAccessoryCategoryTitleUk,
-  updateAccessoryCategoryPictureUrl,
+  updateAccessoryCategory,
   deleteAccessoryCategory,
 };

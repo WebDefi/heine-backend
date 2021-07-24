@@ -16,8 +16,8 @@ export const enum ObjectTypes {
   category = "Category",
   subcategory = "Subcategory",
   product = "Product",
-  accessoryCategory = "Accessory category",
-  accessorySubcategory = "Accessory subcategory",
+  accessoryCategory = "Accessory_category",
+  accessorySubcategory = "Accessory_subcategory",
   accessory = "Accessory",
   newsPost = "News post"
 }

@@ -21,28 +21,20 @@ import {
   deleteCategory,
   getAllCategories,
   getCategoryById,
-  updateCategoryNameRu,
-  updateCategoryNameUk,
-  updateCategoryPictureUrl,
-  updateCategoryTitleRu,
-  updateCategoryTitleUk,
+  updateCategory,
 } from "../queries/categories";
 import {
   createSubcategory,
   deleteSubcategory,
   getAllSubcategoriesByCategoryId,
   getSubcategoryById,
-  updateSubcategoryNameRu,
-  updateSubcategoryNameUk,
-  updateSubcategoryPictureUrl,
-  updateSubcategoryTitleRu,
-  updateSubcategoryTitleUk,
+  updateSubcategory,
 } from "../queries/subcategories";
 import { Category, Product, Subcategory } from ".prisma/client";
 import { onSendGenericLangHandler } from "./onSendLangHook";
-import { langParse } from "../utils/langHandler";
 import { join, resolve } from "path";
 import fileService from "../utils/fileService";
+import dataService from "../utils/dataService";
 
 const sendError = (
   res: any,
@@ -63,7 +55,6 @@ const products: FastifyPluginCallback = async function (
     const imgBase64 = req.body.picture64;
     delete req.body["picture64"];
     const category = await createCategory(req.body);
-
     if (!category) {
       return sendError(
         res,
@@ -74,10 +65,11 @@ const products: FastifyPluginCallback = async function (
       );
     } else {
       const fileName = req.body.pictureUrl;
+      await updateCategory(category.id, {picture_url: dataService.imageUrlHandler(fileName, ObjectTypes.category, category.id)});
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
-          `static/img/${category.id}/${fileName}`
+          `static/img/category/${category.id}/${fileName}`
         ),
         imgBase64
       );
@@ -105,10 +97,12 @@ const products: FastifyPluginCallback = async function (
           )
         );
     } else {
+      const fileName = req.body.pictureUrl;
+      await updateSubcategory(subcategory.id, {picture_url: dataService.imageUrlHandler(fileName, ObjectTypes.subcategory, subcategory.id)})
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
-          `static/img/${subcategory.id}/${subcategory.pictureUrl}`
+          `static/img/${ObjectTypes.subcategory}/${subcategory.id}/${fileName}`
         ),
         imgBase64
       );
@@ -150,7 +144,7 @@ const products: FastifyPluginCallback = async function (
         const result: any = await fileService.createFile(
           join(
             resolve(__dirname, "../../"),
-            `static/img/${product.id}/${imgName}`
+            `static/img/${ObjectTypes.product}/${product.id}/${imgName}`
           ),
           imgBase64
         );
@@ -189,10 +183,6 @@ const products: FastifyPluginCallback = async function (
     }
   );
 
-  const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
-    return lang == "ru" ? nameRu : nameUk;
-  };
-
   fastify.get("/menu", {}, async (req: any, res: any) => {
     const categories: any = await getAllCategories();
     const lang = req.cookies.lang ?? "uk";
@@ -211,7 +201,7 @@ const products: FastifyPluginCallback = async function (
         );
     }
     for (const category of categories) {
-      let tempCategoryName = getNameByLang(
+      let tempCategoryName =  dataService.getNameByLang(
         category.name_ru,
         category.name_uk,
         lang
@@ -222,7 +212,7 @@ const products: FastifyPluginCallback = async function (
       );
       // let subcategoriesData: Array<any> = [];
       for (const subcategory of subcategories) {
-        let tempSubCategoryName = getNameByLang(
+        let tempSubCategoryName =  dataService.getNameByLang(
           subcategory.name_ru,
           subcategory.name_uk,
           lang
@@ -231,7 +221,7 @@ const products: FastifyPluginCallback = async function (
         let products = await getAllProductsBySubcategoryId(subcategory.id);
         // let productsData: Array<any> = [];
         for (const product of products) {
-          let tempProductName = getNameByLang(
+          let tempProductName =  dataService.getNameByLang(
             product.name_ru,
             product.name_uk,
             lang
@@ -246,43 +236,30 @@ const products: FastifyPluginCallback = async function (
 
   fastify.get("/category/:categoryId", {}, async (req: any, res: any) => {
     const lang = req.cookies.lang ?? "uk";
-    const subcategories: any = await getAllSubcategoriesByCategoryId(
-      parseInt(req.params.categoryId)
-    );
-    if (!subcategories) {
-      return res
-        .status(400)
-        .send(
-          new RequestError(
-            400,
-            ErrorTypes.notFoundError,
-            ErrorMessages.notFoundError,
-            ObjectTypes.subcategory
-          )
-        );
+    let category: Category | null = await getCategoryById(parseInt(req.params.categoryId));
+    if(!category) {
+      return res.status(400).send(new RequestError(400, ErrorTypes.notFoundError, ErrorMessages.notFoundError, ObjectTypes.category));
     }
+    category = dataService.langParse(category, lang);
+    category["pictureUrl"] = dataService.imageUrlHandler(category.pictureUrl, ObjectTypes.category, category.id);
+    const subcategories: any = await getAllSubcategoriesByCategoryId(parseInt(req.params.categoryId));
     for (let i = 0; i < subcategories.length; i++) {
-      subcategories[i] = langParse(subcategories[i], lang);
+      subcategories[i] = dataService.langParse(subcategories[i], lang);
       let products = await getAllProductsBySubcategoryId(subcategories[i].id);
       products.forEach(
-        (item, key, array) => (array[key] = langParse(item, lang))
+        (item, key, array) => (array[key] = dataService.langParse(item, lang))
       );
       subcategories[i] = {
         subcategory: subcategories[i],
         products: products,
       };
     }
-    return res.status(200).send({ subcategories });
+    return res.status(200).send({ category, subcategories });
   });
 
-  fastify.get(
-    "/subcategory/:subcategoryId",
-    { onSend: onSendGenericLangHandler },
-    async (req: any, res: FastifyReply) => {
+  fastify.get("/subcategory/:subcategoryId", { onSend: onSendGenericLangHandler }, async (req: any, res: FastifyReply) => {
       const lang = req.cookies.lang ?? "uk";
-      let subcategory = await getSubcategoryById(
-        parseInt(req.params.subcategoryId)
-      );
+      let subcategory: Subcategory | null = await getSubcategoryById(parseInt(req.params.subcategoryId));
       if (!subcategory) {
         return res
           .status(400)
@@ -295,24 +272,10 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
-      subcategory = langParse(subcategory, lang);
-      const products: Product[] = await getAllProductsBySubcategoryId(
-        parseInt(req.params.subcategoryId)
-      );
-      if (!products) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.product
-            )
-          );
-      }
+      subcategory = dataService.langParse(subcategory, lang);
+      const products: Product[] = await getAllProductsBySubcategoryId(parseInt(req.params.subcategoryId));
       products.forEach(
-        (item, key, array) => (array[key] = langParse(item, lang))
+        (item, key, array) => (array[key] = dataService.langParse(item, lang))
       );
       return res.status(200).send({ subcategory, products });
     }
@@ -337,13 +300,13 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
-      product = langParse(product, req.cookies.lang ?? "uk");
+      product = dataService.langParse(product, req.cookies.lang ?? "uk");
       return res.status(200).send(product);
     }
   );
 
   fastify.patch(
-    "/category/update/nameRu/:categoryId",
+    "/category/update/:categoryId",
     {},
     async (req: any, res: FastifyReply) => {
       const category: Category | null = await getCategoryById(
@@ -361,7 +324,7 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
-      const updatedCategory: Category | null = await updateCategoryNameRu(
+      const updatedCategory: Category | null = await updateCategory(
         parseInt(req.params.categoryId),
         req.body
       );
@@ -382,13 +345,13 @@ const products: FastifyPluginCallback = async function (
   );
 
   fastify.patch(
-    "/category/update/nameUk/:categoryId",
+    "/subcategory/update/:subcategoryId",
     {},
     async (req: any, res: FastifyReply) => {
-      const category: Category | null = await getCategoryById(
-        parseInt(req.params.categoryId)
+      const subcategory: Subcategory | null = await getSubcategoryById(
+        parseInt(req.params.subcategoryId)
       );
-      if (!category) {
+      if (!subcategory) {
         return res
           .status(400)
           .send(
@@ -396,171 +359,14 @@ const products: FastifyPluginCallback = async function (
               400,
               ErrorTypes.notFoundError,
               ErrorMessages.notFoundError,
-              ObjectTypes.category
+              ObjectTypes.subcategory
             )
           );
       }
-      const updatedCategory: Category | null = await updateCategoryNameUk(
-        parseInt(req.params.categoryId),
+      const updatedSubcategory: Subcategory | null = await updateSubcategory(
+        parseInt(req.params.subcategoryId),
         req.body
       );
-      if (!updatedCategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.category
-            )
-          );
-      }
-      return res.status(200).send(updatedCategory);
-    }
-  );
-
-  fastify.patch(
-    "/category/update/titleRu/:categoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const category: Category | null = await getCategoryById(
-        parseInt(req.params.categoryId)
-      );
-      if (!category) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.category
-            )
-          );
-      }
-      const updatedCategory: Category | null = await updateCategoryTitleRu(
-        parseInt(req.params.categoryId),
-        req.body
-      );
-      if (!updatedCategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.category
-            )
-          );
-      }
-      return res.status(200).send(updatedCategory);
-    }
-  );
-
-  fastify.patch(
-    "/category/update/titleUk/:categoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const category: Category | null = await getCategoryById(
-        parseInt(req.params.categoryId)
-      );
-      if (!category) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.category
-            )
-          );
-      }
-      const updatedCategory: Category | null = await updateCategoryTitleUk(
-        parseInt(req.params.categoryId),
-        req.body
-      );
-      if (!updatedCategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.category
-            )
-          );
-      }
-      return res.status(200).send(updatedCategory);
-    }
-  );
-
-  fastify.patch(
-    "/category/update/pictureUrl/:categoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const category: Category | null = await getCategoryById(
-        parseInt(req.params.categoryId)
-      );
-      if (!category) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.category
-            )
-          );
-      }
-      const updatedCategory: Category | null = await updateCategoryPictureUrl(
-        parseInt(req.params.categoryId),
-        req.body
-      );
-      if (!updatedCategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.category
-            )
-          );
-      }
-      return res.status(200).send(updatedCategory);
-    }
-  );
-
-  fastify.patch(
-    "/subcategory/update/nameRu/:subcategoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const subcategory: Subcategory | null = await getSubcategoryById(
-        parseInt(req.params.subcategoryId)
-      );
-      if (!subcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      const updatedSubcategory: Subcategory | null =
-        await updateSubcategoryNameRu(
-          parseInt(req.params.subcategoryId),
-          req.body
-        );
       if (!updatedSubcategory) {
         return res
           .status(400)
@@ -569,167 +375,7 @@ const products: FastifyPluginCallback = async function (
               400,
               ErrorTypes.invalidUpdateDataError,
               ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      return res.status(200).send(updatedSubcategory);
-    }
-  );
-
-  fastify.patch(
-    "/subcategory/update/nameUk/:subcategoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const subcategory: Subcategory | null = await getSubcategoryById(
-        parseInt(req.params.subcategoryId)
-      );
-      if (!subcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      const updatedSubcategory: Subcategory | null =
-        await updateSubcategoryNameUk(
-          parseInt(req.params.subcategoryId),
-          req.body
-        );
-      if (!updatedSubcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      return res.status(200).send(updatedSubcategory);
-    }
-  );
-
-  fastify.patch(
-    "/subcategory/update/titleRu/:subcategoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const subcategory: Subcategory | null = await getSubcategoryById(
-        parseInt(req.params.subcategoryId)
-      );
-      if (!subcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      const updatedSubcategory: Subcategory | null =
-        await updateSubcategoryTitleRu(
-          parseInt(req.params.subcategoryId),
-          req.body
-        );
-      if (!updatedSubcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      return res.status(200).send(updatedSubcategory);
-    }
-  );
-
-  fastify.patch(
-    "/subcategory/update/titleUk/:subcategoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const subcategory: Subcategory | null = await getSubcategoryById(
-        parseInt(req.params.subcategoryId)
-      );
-      if (!subcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      const updatedSubcategory: Subcategory | null =
-        await updateSubcategoryTitleUk(
-          parseInt(req.params.subcategoryId),
-          req.body
-        );
-      if (!updatedSubcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      return res.status(200).send(updatedSubcategory);
-    }
-  );
-
-  fastify.patch(
-    "/subcategory/update/pictureUrl/:subcategoryId",
-    {},
-    async (req: any, res: FastifyReply) => {
-      const subcategory: Subcategory | null = await getSubcategoryById(
-        parseInt(req.params.subcategoryId)
-      );
-      if (!subcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.subcategory
-            )
-          );
-      }
-      const updatedSubcategory: Subcategory | null =
-        await updateSubcategoryPictureUrl(
-          parseInt(req.params.subcategoryId),
-          req.body
-        );
-      if (!updatedSubcategory) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.invalidUpdateDataError,
-              ErrorMessages.invalidUpdateDataError,
-              ObjectTypes.subcategory
+              ObjectTypes.category
             )
           );
       }
