@@ -65,7 +65,13 @@ const products: FastifyPluginCallback = async function (
       );
     } else {
       const fileName = req.body.pictureUrl;
-      await updateCategory(category.id, {picture_url: dataService.imageUrlHandler(fileName, ObjectTypes.category, category.id)});
+      await updateCategory(category.id, {
+        picture_url: dataService.imageUrlHandler(
+          fileName,
+          ObjectTypes.category,
+          category.id
+        ),
+      });
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
@@ -98,7 +104,13 @@ const products: FastifyPluginCallback = async function (
         );
     } else {
       const fileName = req.body.pictureUrl;
-      await updateSubcategory(subcategory.id, {picture_url: dataService.imageUrlHandler(fileName, ObjectTypes.subcategory, subcategory.id)})
+      await updateSubcategory(subcategory.id, {
+        picture_url: dataService.imageUrlHandler(
+          fileName,
+          ObjectTypes.subcategory,
+          subcategory.id
+        ),
+      });
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
@@ -189,7 +201,7 @@ const products: FastifyPluginCallback = async function (
         );
     }
     for (const category of categories) {
-      let tempCategoryName =  dataService.getNameByLang(
+      let tempCategoryName = dataService.getNameByLang(
         category.name_ru,
         category.name_uk,
         lang
@@ -200,7 +212,7 @@ const products: FastifyPluginCallback = async function (
       );
       // let subcategoriesData: Array<any> = [];
       for (const subcategory of subcategories) {
-        let tempSubCategoryName =  dataService.getNameByLang(
+        let tempSubCategoryName = dataService.getNameByLang(
           subcategory.name_ru,
           subcategory.name_uk,
           lang
@@ -209,7 +221,7 @@ const products: FastifyPluginCallback = async function (
         let products = await getAllProductsBySubcategoryId(subcategory.id);
         // let productsData: Array<any> = [];
         for (const product of products) {
-          let tempProductName =  dataService.getNameByLang(
+          let tempProductName = dataService.getNameByLang(
             product.name_ru,
             product.name_uk,
             lang
@@ -224,13 +236,30 @@ const products: FastifyPluginCallback = async function (
 
   fastify.get("/category/:categoryId", {}, async (req: any, res: any) => {
     const lang = req.cookies.lang ?? "uk";
-    let category: Category | null = await getCategoryById(parseInt(req.params.categoryId));
-    if(!category) {
-      return res.status(400).send(new RequestError(400, ErrorTypes.notFoundError, ErrorMessages.notFoundError, ObjectTypes.category));
+    let category: Category | null = await getCategoryById(
+      parseInt(req.params.categoryId)
+    );
+    if (!category) {
+      return res
+        .status(400)
+        .send(
+          new RequestError(
+            400,
+            ErrorTypes.notFoundError,
+            ErrorMessages.notFoundError,
+            ObjectTypes.category
+          )
+        );
     }
     category = dataService.langParse(category, lang);
-    category["pictureUrl"] = dataService.imageUrlHandler(category.pictureUrl, ObjectTypes.category, category.id);
-    const subcategories: any = await getAllSubcategoriesByCategoryId(parseInt(req.params.categoryId));
+    category["pictureUrl"] = dataService.imageUrlHandler(
+      category.pictureUrl,
+      ObjectTypes.category,
+      category.id
+    );
+    const subcategories: any = await getAllSubcategoriesByCategoryId(
+      parseInt(req.params.categoryId)
+    );
     for (let i = 0; i < subcategories.length; i++) {
       subcategories[i] = dataService.langParse(subcategories[i], lang);
       let products = await getAllProductsBySubcategoryId(subcategories[i].id);
@@ -245,9 +274,14 @@ const products: FastifyPluginCallback = async function (
     return res.status(200).send({ category, subcategories });
   });
 
-  fastify.get("/subcategory/:subcategoryId", { onSend: onSendGenericLangHandler }, async (req: any, res: FastifyReply) => {
+  fastify.get(
+    "/subcategory/:subcategoryId",
+    { onSend: onSendGenericLangHandler },
+    async (req: any, res: FastifyReply) => {
       const lang = req.cookies.lang ?? "uk";
-      let subcategory: Subcategory | null = await getSubcategoryById(parseInt(req.params.subcategoryId));
+      let subcategory: Subcategory | null = await getSubcategoryById(
+        parseInt(req.params.subcategoryId)
+      );
       if (!subcategory) {
         return res
           .status(400)
@@ -261,7 +295,9 @@ const products: FastifyPluginCallback = async function (
           );
       }
       subcategory = dataService.langParse(subcategory, lang);
-      const products: Product[] = await getAllProductsBySubcategoryId(parseInt(req.params.subcategoryId));
+      const products: Product[] = await getAllProductsBySubcategoryId(
+        parseInt(req.params.subcategoryId)
+      );
       products.forEach(
         (item, key, array) => (array[key] = dataService.langParse(item, lang))
       );
@@ -312,6 +348,20 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
+      const imgBase64 = req.body.picture64;
+      if (!imgBase64) {
+        return res
+          .status(400)
+          .send(
+            new RequestError(
+              400,
+              ErrorTypes.notFoundError,
+              ErrorMessages.notFoundError,
+              ObjectTypes.category
+            )
+          );
+      }
+      delete req.body["picture64"];
       const updatedCategory: Category | null = await updateCategory(
         parseInt(req.params.categoryId),
         req.body
@@ -327,6 +377,22 @@ const products: FastifyPluginCallback = async function (
               ObjectTypes.category
             )
           );
+      } else {
+        const deleteResponse: any = await fileService.deleteFile(
+          join(
+            resolve(__dirname, "../../"),
+            `/static/img/category/${category.id}/${category.pictureUrl}`
+          )
+        );
+        if (deleteResponse.error) res.status(400).send(deleteResponse);
+        const createResponse: any = await fileService.createFile(
+          join(
+            resolve(__dirname, "../../"),
+            `/static/img/category/${updatedCategory.id}/${updatedCategory.pictureUrl}`
+          ),
+          imgBase64
+        );
+        if (createResponse.error) res.status(400).send(createResponse);
       }
       return res.status(200).send(updatedCategory);
     }
@@ -351,6 +417,20 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
+      const imgBase64 = req.body.picture64;
+      if (!imgBase64) {
+        return res
+          .status(400)
+          .send(
+            new RequestError(
+              400,
+              ErrorTypes.notFoundError,
+              ErrorMessages.notFoundError,
+              ObjectTypes.subcategory
+            )
+          );
+      }
+      delete req.body["picture64"];
       const updatedSubcategory: Subcategory | null = await updateSubcategory(
         parseInt(req.params.subcategoryId),
         req.body
@@ -366,6 +446,22 @@ const products: FastifyPluginCallback = async function (
               ObjectTypes.category
             )
           );
+      } else {
+        const deleteResponse: any = await fileService.deleteFile(
+          join(
+            resolve(__dirname, "../../"),
+            `/static/img/category/${subcategory.id}/${subcategory.pictureUrl}`
+          )
+        );
+        if (deleteResponse.error) res.status(400).send(deleteResponse);
+        const createResponse: any = await fileService.createFile(
+          join(
+            resolve(__dirname, "../../"),
+            `/static/img/category/${updatedSubcategory.id}/${updatedSubcategory.pictureUrl}`
+          ),
+          imgBase64
+        );
+        if (createResponse.error) res.status(400).send(createResponse);
       }
       return res.status(200).send(updatedSubcategory);
     }
