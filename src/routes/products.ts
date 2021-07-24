@@ -501,6 +501,92 @@ const products: FastifyPluginCallback = async function (
     }
   );
 
+  fastify.post(
+    "/product/update/:productId",
+    {},
+    async (req: any, res: FastifyReply) => {
+      const product: Product | null = await getProductById(
+        parseInt(req.params.productId)
+      );
+      if (!product) {
+        return res
+          .status(400)
+          .send(
+            new RequestError(
+              400,
+              ErrorTypes.notFoundError,
+              ErrorMessages.notFoundError,
+              ObjectTypes.product
+            )
+          );
+      }
+      if (req.body.request == "delete") {
+        const imageName = req.body.imageName;
+        let documents = product.documents.filter(
+          (imageUrl: string) => imageUrl != imageName
+        );
+        const updateResponce = await updateProduct(
+          parseInt(req.params.productId),
+          { documents }
+        );
+        if (!updateResponce) {
+          return res
+            .status(400)
+            .send(
+              new RequestError(
+                400,
+                ErrorTypes.notFoundError,
+                ErrorMessages.notFoundError,
+                ObjectTypes.product
+              )
+            );
+        } else {
+          const result: any = await fileService.deleteFile(
+            join(
+              resolve(__dirname, "../../"),
+              `/static/img/category/${updateResponce.id}/${imageName}`
+            )
+          );
+          if (result.error) {
+            return res.status(400).send(result);
+          }
+        }
+      } else {
+        const imageData = req.body.imageData;
+        delete req.body["imageData"];
+        const updatedProduct: Product | null = await updateProduct(
+          parseInt(req.params.productId),
+          { ...req.body, ...{ documents: Object.keys(imageData) } }
+        );
+        if (!updatedProduct) {
+          return res
+            .status(400)
+            .send(
+              new RequestError(
+                400,
+                ErrorTypes.invalidUpdateDataError,
+                ErrorMessages.invalidUpdateDataError,
+                ObjectTypes.product
+              )
+            );
+        } else {
+          for (let imageName in imageData) {
+            let tempCreateResponse: any = await fileService.createFile(
+              join(
+                resolve(__dirname, "../../"),
+                `/static/img/category/${updatedProduct.id}/${imageName}`
+              ),
+              imageData[imageName]
+            );
+            if (tempCreateResponse.error)
+              res.status(400).send(tempCreateResponse);
+          }
+        }
+        return res.status(200).send(updatedProduct);
+      }
+    }
+  );
+
   fastify.patch(
     "/product/update/shortCharacteristics/:productId",
     {},
