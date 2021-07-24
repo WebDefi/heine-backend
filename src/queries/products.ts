@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Product } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -192,6 +192,18 @@ const updateProductFAQs = async function (
   });
 };
 
+const updateProduct = async function(productId: number, data: any) {
+  const product: Product | null = await getProductById(productId);
+  return await prisma.product.update({
+    where: {
+      id: productId,
+    },
+    data: {
+      ...data,
+    }
+  })
+}
+
 const deleteProduct = async function (productId: number) {
   return await prisma.product.delete({
     where: { 
@@ -212,18 +224,10 @@ export {
   createProduct,
   getProductById,
   getAllProductsBySubcategoryId,
-  updateProductConfiguration,
   updateProductDocuments,
-  updateProductNameRu,
-  updateProductNameUk,
-  updateProductTitleRu,
-  updateProductTitleUk,
   updateProductShortChars,
-  updateProductLongCharsRu,
-  updateProductLongCharsUk,
-  updateProductDescriptionRu,
-  updateProductDescriptionUk,
   updateProductFAQs,
+  updateProduct,
   deleteProduct,
   deleteProductsBySubcategoryId,
 };

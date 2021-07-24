@@ -106,11 +106,7 @@ const updateSubcategory = async function (subcategoryId: number, data: any) {
       id: subcategoryId,
     },
     data: {
-      name_ru: data.name_ru ?? subcategory?.name_ru,
-      name_uk: data.name_uk ?? subcategory?.name_uk,
-      title_ru: data.title_ru ?? subcategory?.title_ru,
-      title_uk: data.title_uk ?? subcategory?.title_uk,
-      pictureUrl: data.pictureUrl ?? subcategory?.pictureUrl,
+      ...data,
     },
   });
 };

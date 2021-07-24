@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Accessory, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -186,6 +186,18 @@ const updateAccessoryDocuments = async function (
   });
 };
 
+const updateAccessory = async function(accessoryId: number, data: any) {
+  const product: Accessory | null = await getAccessoryById(accessoryId);
+  return await prisma.accessory.update({
+    where: {
+      id: accessoryId,
+    },
+    data: {
+      ...data,
+    }
+  })
+}
+
 const deleteAccessory = async function (accessoryId: number) {
   return await prisma.accessory.delete({
     where: { 
@@ -208,15 +220,8 @@ export {
   getAllAccessoriesByAccessorySubcategoryId,
   updateAccessoryConfiguration,
   updateAccessoryDocuments,
-  updateAccessoryNameRu,
-  updateAccessoryNameUk,
-  updateAccessoryTitleRu,
-  updateAccessoryTitleUk,
   updateAccessoryShortChars,
-  updateAccessoryLongCharsRu,
-  updateAccessoryLongCharsUk,
-  updateAccessoryDescriptionRu,
-  updateAccessoryDescriptionUk,
+  updateAccessory,
   deleteAccessory,
   deleteAccessoriesByAccessorySubcategoryId,
 };

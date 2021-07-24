@@ -32,11 +32,7 @@ const updateCategory = async function (categoryId: number, data: any) {
       id: categoryId,
     },
     data: {
-      name_ru: data.name_ru ?? category?.name_ru,
-      name_uk: data.name_uk ?? category?.name_uk,
-      title_ru: data.title_ru ?? category?.title_ru,
-      title_uk: data.title_uk ?? category?.title_uk,
-      pictureUrl: data.pictureUrl ?? category?.pictureUrl,
+      ...data,
     },
   });
 };

@@ -5,17 +5,10 @@ import {
   deleteAccessory,
   getAccessoryById,
   getAllAccessoriesByAccessorySubcategoryId,
+  updateAccessory,
   updateAccessoryConfiguration,
-  updateAccessoryDescriptionRu,
-  updateAccessoryDescriptionUk,
   updateAccessoryDocuments,
-  updateAccessoryLongCharsRu,
-  updateAccessoryLongCharsUk,
-  updateAccessoryNameRu,
-  updateAccessoryNameUk,
   updateAccessoryShortChars,
-  updateAccessoryTitleRu,
-  updateAccessoryTitleUk,
 } from "../queries/accessories";
 import { 
   createAccessoryCategory, 
@@ -36,7 +29,7 @@ import { RequestError } from "../utils/requestError";
 import { onSendGenericLangHandler } from "./onSendLangHook";
 import { join, resolve } from "path";
 import dataService from "../utils/dataService";
-import fileService from "src/utils/fileService";
+import fileService from "../utils/fileService";
 
 const sendError = (
   res: any,
@@ -317,140 +310,45 @@ fastify.patch(
       return res.status(200).send(updatedSubcategory);
     }
   );
-  
-  fastify.patch("/accessory/update/nameRu/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
+
+  fastify.patch(
+    "/product/update/:accessoryId",
+    {},
+    async (req: any, res: FastifyReply) => {
+      const accessory: Accessory | null = await getAccessoryById(
+        parseInt(req.params.accessoryId)
+      );
+      if (!accessory) {
+        return res
+          .status(400)
+          .send(
+            new RequestError(
+              400,
+              ErrorTypes.notFoundError,
+              ErrorMessages.notFoundError,
+              ObjectTypes.accessory,
+            )
+          );
+      }
+      const updatedAccessory: Accessory | null = await updateAccessory(
+        parseInt(req.params.accessoryId),
+        req.body
+      );
+      if (!updateAccessory) {
+        return res
+          .status(400)
+          .send(
+            new RequestError(
+              400,
+              ErrorTypes.invalidUpdateDataError,
+              ErrorMessages.invalidUpdateDataError,
+              ObjectTypes.product
+            )
+          );
+      }
+      return res.status(200).send(updateAccessory);
     }
-    const updatedAccessory: Accessory | null = await updateAccessoryNameRu(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
-  
-  fastify.patch("/accessory/update/nameUk/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
-    }
-    const updatedAccessory: Accessory | null = await updateAccessoryNameUk(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
-  
-  fastify.patch("/accessory/update/titleRu/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
-    }
-    const updatedAccessory: Accessory | null = await updateAccessoryTitleRu(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
-  
-  fastify.patch("/accessory/update/titleUk/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
-    }
-    const updatedAccessory: Accessory | null = await updateAccessoryTitleUk(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
-  
-  
-  fastify.patch("/accessory/update/descriptionRu/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
-    }
-    const updatedAccessory: Accessory | null = await updateAccessoryDescriptionRu(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
-  
-  
-  fastify.patch("/accessory/update/descriptionUk/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
-    }
-    const updatedAccessory: Accessory | null = await updateAccessoryDescriptionUk(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
+  );
 
   fastify.patch("/accessory/update/shortCharacteristics/:accessoryId", {}, async (req: any, res: FastifyReply) => {
     const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
@@ -473,53 +371,7 @@ fastify.patch(
     }
     return res.status(200).send(updatedAccessory);
   });    
-
-  fastify.patch("/accessory/update/longCharacteristicsRu/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
-    }
-    const updatedAccessory: Accessory | null = await updateAccessoryLongCharsRu(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
-
-
-  fastify.patch("/accessory/update/longCharacteristicsUk/:accessoryId", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
-    if (!accessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.notFoundError, 
-        ErrorMessages.notFoundError,
-        ObjectTypes.accessory,
-        ));
-    }
-    const updatedAccessory: Accessory | null = await updateAccessoryLongCharsUk(parseInt(req.params.accessoryId) ,req.body);
-    if (!updatedAccessory) {
-      return res.status(400).send(new RequestError(
-        400, 
-        ErrorTypes.invalidUpdateDataError, 
-        ErrorMessages.invalidUpdateDataError,
-        ObjectTypes.accessory
-        ));
-    }
-    return res.status(200).send(updatedAccessory);
-  });
-
-
+  
   fastify.patch("/accessory/update/configuration/:accessoryId", {}, async (req: any, res: FastifyReply) => {
     const accessory: Accessory | null = await getAccessoryById(parseInt(req.params.accessoryId));
     if (!accessory) {
