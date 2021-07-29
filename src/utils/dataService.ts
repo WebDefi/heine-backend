@@ -24,7 +24,7 @@ class DataService {
   }
   public imageUrlHandler(obj: any, type: ObjectTypes) {
     for (let key in obj) {
-      if (/picture/.test(key)) {
+      if (key == "pictureUrl") {
         obj[key] = `http://${"116.202.243.73"}:${"3000"}/img/${type.toLocaleLowerCase()}/${obj["id"]}/${obj[key]}`;
       }
     }
