@@ -523,6 +523,7 @@ const products: FastifyPluginCallback = async function (
             return res.status(400).send(result);
           }
         }
+        return res.status(204);
       } else {
         const imageData = req.body.imageData;
         delete req.body["imageData"];
@@ -551,7 +552,7 @@ const products: FastifyPluginCallback = async function (
               imageData[imageName]
             );
             if (tempCreateResponse.error)
-              res.status(400).send(tempCreateResponse);
+              return res.status(400).send(tempCreateResponse);
           }
         }
         return res.status(200).send(updatedProduct);
