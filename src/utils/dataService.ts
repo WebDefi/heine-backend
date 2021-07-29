@@ -6,7 +6,7 @@ class DataService {
     dotenv.config();
   }
   public langParse(obj: any, lang: string) {
-    for(let key in obj) {
+    for (let key in obj) {
         if (/_ru|_uk/.test(key)) {
           if (new RegExp(`${lang}`).test(key)) {
             let newKey = key.split('_')[0];
@@ -19,11 +19,20 @@ class DataService {
     }
     return obj;
   }
-  public getNameByLang(nameRu: string, nameUk: string, lang: string) : string {
+  public getNameByLang(nameRu: string, nameUk: string, lang: string) {
     return lang == "uk" ? nameUk : nameRu;
   }
-  public imageUrlHandler(imageUrl: string, object: ObjectTypes, id: number) : string {
-    return `http://${process.env.HOST}:${process.env.PORT}/img/${object.toLocaleLowerCase()}/${id}/${imageUrl}`;
+  public imageUrlHandler(obj: any, type: ObjectTypes) {
+    for (let key in obj) {
+      if (/picture/.test(key)) {
+        obj[key] = `http://${process.env.HOST}:${process.env.PORT}/img/${type.toLocaleLowerCase()}/${obj["id"]}/${obj[key]}`;
+      }
+    }
+    return obj;
+  }
+  public beautifyObj(obj: any, lang: string, type: ObjectTypes) {
+    obj = this.langParse(obj, lang), this.imageUrlHandler(obj, type);
+    return obj;
   }
 }
 
