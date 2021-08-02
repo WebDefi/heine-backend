@@ -25,11 +25,9 @@ export const onSendGenericLangHandler = (
       });
       return elObj;
     });
-    // console.log(payload);
   } else {
     Object.keys(payload).forEach((key: string) => {
       if (/_ru|_uk/.test(key)) {
-        // title_ru == true title_uk == true
         if (new RegExp(`${lang}`).test(key)) {
           let tempValue = payload[key];
           let tempNewKey = key.split("_")[0];
@@ -39,11 +37,8 @@ export const onSendGenericLangHandler = (
           delete payload[key];
         }
       }
-    }); // payload = {}
+    });
   }
   payload = JSON.stringify(payload);
-  // Object.assign(rep, { payload });
-
-  // console.log(rep)
   done(err, payload);
 };

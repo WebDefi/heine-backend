@@ -26,7 +26,7 @@ import {
 } from "../queries/accessorySubcategories";
 import { ErrorMessages, ErrorTypes, ObjectTypes } from "../utils/constants";
 import { RequestError } from "../utils/requestError";
-import { onSendGenericLangHandler } from "./onSendLangHook";
+import { onSendGenericLangHandler } from "../utils/onSendLangHook";
 import { join, resolve } from "path";
 import dataService from "../utils/dataService";
 import fileService from "../utils/fileService";
@@ -60,7 +60,6 @@ const accessories: FastifyPluginCallback = async function (
       );
     } else {
       const fileName = req.body.pictureUrl;
-      await updateAccessoryCategory(accessoryCategory.id, {picture_url: dataService.imageUrlHandler(fileName, ObjectTypes.accessoryCategory, accessoryCategory.id)});
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
@@ -90,7 +89,6 @@ const accessories: FastifyPluginCallback = async function (
       );
     } else {
       const fileName = req.body.pictureUrl;
-      await updateAccessorySubcategory(accessorySubcategory.id, {picture_url: dataService.imageUrlHandler(fileName, ObjectTypes.accessorySubcategory, accessorySubcategory.id)});
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
@@ -107,7 +105,13 @@ const accessories: FastifyPluginCallback = async function (
   });
 
   fastify.put("/accessory/create", {}, async (req: any, res: FastifyReply) => {
-    const accessory: Accessory = await createAccessory(req.body);
+    let body = req.body;
+    const imageData = body.imageData;
+    delete body["imageData"];
+    const accessory: Accessory = await createAccessory({
+      body,
+      ...{ documents: Object.keys(imageData) },
+    });
     if (!accessory) {
       res.status(400).send(new RequestError(
           400,
@@ -115,6 +119,20 @@ const accessories: FastifyPluginCallback = async function (
           ErrorMessages.invalidCreationDataError,
           ObjectTypes.accessory,
         ));
+    } else {
+      for (let imgName in imageData) {
+        const imgBase64 = imageData[imgName];
+        const result: any = await fileService.createFile(
+          join(
+            resolve(__dirname, "../../"),
+            `static/img/product/${accessory.id}/${imgName}`
+          ),
+          imgBase64
+        );
+        if (result.error) {
+          return res.status(400).send(result);
+        }
+      }
     }
     return res.status(200).send(accessory);
   });
@@ -132,14 +150,9 @@ const accessories: FastifyPluginCallback = async function (
     return res.status(200).send(accessoryCategories);
   });
 
-const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
-  return lang == 'ru' ? nameRu : nameUk;
-}
-
   fastify.get("/menu", {}, async (_req: any, res: any) => {
-    const categories: any = await getAllAccessoryCategories();
     const lang = _req.cookies.lang ?? 'uk';
-    // Add postClientRequest hook on cookie lang
+    const categories: any = await getAllAccessoryCategories();
     const data: {[key: string]: any} = {};
     if (!categories) {
       return res.status(400).send(new RequestError(
@@ -150,15 +163,15 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
           ));
     }
     for (const category of categories) {
-      let tempCategoryName = getNameByLang(category.name_ru, category.name_uk, lang);
+      let tempCategoryName = dataService.getNameByLang(category.name_ru, category.name_uk, lang);
       data[tempCategoryName] = {};
       let subcategories: AccessorySubcategory[] = await getAllAccessorySubcategoriesByCategoryId(category.id);
       for (const subcategory of subcategories) {
-        let tempSubCategoryName = getNameByLang(subcategory.name_ru, subcategory.name_uk, lang);
+        let tempSubCategoryName = dataService.getNameByLang(subcategory.name_ru, subcategory.name_uk, lang);
         data[tempCategoryName][tempSubCategoryName] = {}
         let accessories = await getAllAccessoriesByAccessorySubcategoryId(subcategory.id);
         for(const accessory of accessories) {
-          let tempProductName = getNameByLang(accessory.name_ru, accessory.name_uk, lang);
+          let tempProductName = dataService.getNameByLang(accessory.name_ru, accessory.name_uk, lang);
           data[tempCategoryName][tempSubCategoryName][tempProductName] = accessory.id;
         }
       }
@@ -168,19 +181,25 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
 
   fastify.get("/accessoryCategory/:categoryId", {}, async (req: any, res: any) => {
     const lang = req.cookies.lang ?? "uk";
-    const accessorySubcategories: any = await getAllAccessorySubcategoriesByCategoryId(
-      parseInt(req.params.categoryId)
-    );
-    if (!accessorySubcategories) {
-        return res.status(400).send(new RequestError(
+    let category: AccessoryCategory | null = await getAccessoryCategoryById(parseInt(req.params.categoryId));
+      if (!category) {
+      return res
+        .status(400)
+        .send(
+          new RequestError(
             400,
             ErrorTypes.notFoundError,
             ErrorMessages.notFoundError,
-            ObjectTypes.accessorySubcategory,
-          ));
+            ObjectTypes.accessoryCategory
+          )
+        );
     }
+    category = dataService.beautifyObj(category, lang, ObjectTypes.accessoryCategory);
+    const accessorySubcategories: any = await getAllAccessorySubcategoriesByCategoryId(
+      parseInt(req.params.categoryId)
+    );
     for (let i = 0; i < accessorySubcategories.length; i++) {
-      accessorySubcategories[i] = dataService.langParse(accessorySubcategories[i], lang);
+      accessorySubcategories[i] = dataService.beautifyObj(accessorySubcategories[i], lang, ObjectTypes.accessorySubcategory);
       let accessories = await getAllAccessoriesByAccessorySubcategoryId(accessorySubcategories[i].id);
       accessories.forEach((item, key, array) => array[key] = dataService.langParse(item, lang));
       accessorySubcategories[i] = { 
@@ -188,7 +207,7 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
         products: accessories,
       }
     }
-    return res.status(200).send({ accessorySubcategories });
+    return res.status(200).send({ category, accessorySubcategories });
   });
 
   fastify.get("/accessorySubcategory/:subcategoryId", {}, async (req: any, res: FastifyReply) => {
@@ -202,16 +221,8 @@ const getNameByLang = (nameRu: string, nameUk: string, lang: string) => {
             ObjectTypes.accessorySubcategory,
           ));
       }
-      accessorySubcategory = dataService.langParse(accessorySubcategory, lang);
+      accessorySubcategory = dataService.beautifyObj(accessorySubcategory, lang, ObjectTypes.accessorySubcategory);
       const accessories: Accessory[] = await getAllAccessoriesByAccessorySubcategoryId(parseInt(req.params.subcategoryId));
-      if (!accessories) {
-        return res.status(400).send(new RequestError(
-            400,
-            ErrorTypes.notFoundError,
-            ErrorMessages.notFoundError,
-            ObjectTypes.accessory,
-          ));
-      }
       accessories.forEach((item, key, array) => array[key] = dataService.langParse(item, lang));
       return res.status(200).send({ accessorySubcategory, accessories });
     }

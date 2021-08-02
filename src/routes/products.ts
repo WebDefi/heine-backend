@@ -26,7 +26,7 @@ import {
   updateSubcategory,
 } from "../queries/subcategories";
 import { Category, Product, Subcategory } from ".prisma/client";
-import { onSendGenericLangHandler } from "./onSendLangHook";
+import { onSendGenericLangHandler } from "../utils/onSendLangHook";
 import { join, resolve } from "path";
 import fileService from "../utils/fileService";
 import dataService from "../utils/dataService";
@@ -60,13 +60,6 @@ const products: FastifyPluginCallback = async function (
       );
     } else {
       const fileName = req.body.pictureUrl;
-      await updateCategory(category.id, {
-        picture_url: dataService.imageUrlHandler(
-          fileName,
-          ObjectTypes.category,
-          category.id
-        ),
-      });
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
@@ -99,13 +92,6 @@ const products: FastifyPluginCallback = async function (
         );
     } else {
       const fileName = req.body.pictureUrl;
-      await updateSubcategory(subcategory.id, {
-        picture_url: dataService.imageUrlHandler(
-          fileName,
-          ObjectTypes.subcategory,
-          subcategory.id
-        ),
-      });
       const result: any = await fileService.createFile(
         join(
           resolve(__dirname, "../../"),
@@ -162,18 +148,6 @@ const products: FastifyPluginCallback = async function (
     { onSend: onSendGenericLangHandler },
     async (_req: any, res: any) => {
       const categories = await getAllCategories();
-      if (!categories) {
-        return res
-          .status(400)
-          .send(
-            new RequestError(
-              400,
-              ErrorTypes.notFoundError,
-              ErrorMessages.notFoundError,
-              ObjectTypes.category
-            )
-          );
-      }
       return res.status(200).send(categories);
     }
   );
@@ -205,7 +179,6 @@ const products: FastifyPluginCallback = async function (
       let subcategories: Subcategory[] = await getAllSubcategoriesByCategoryId(
         category.id
       );
-      // let subcategoriesData: Array<any> = [];
       for (const subcategory of subcategories) {
         let tempSubCategoryName = dataService.getNameByLang(
           subcategory.name_ru,
@@ -214,7 +187,6 @@ const products: FastifyPluginCallback = async function (
         );
         data[tempCategoryName][tempSubCategoryName] = {};
         let products = await getAllProductsBySubcategoryId(subcategory.id);
-        // let productsData: Array<any> = [];
         for (const product of products) {
           let tempProductName = dataService.getNameByLang(
             product.name_ru,
@@ -246,20 +218,17 @@ const products: FastifyPluginCallback = async function (
           )
         );
     }
-    category = dataService.langParse(category, lang);
-    category["pictureUrl"] = dataService.imageUrlHandler(
-      category.pictureUrl,
-      ObjectTypes.category,
-      category.id
-    );
+    category = dataService.beautifyObj(category, lang, ObjectTypes.category);
     const subcategories: any = await getAllSubcategoriesByCategoryId(
       parseInt(req.params.categoryId)
     );
     for (let i = 0; i < subcategories.length; i++) {
-      subcategories[i] = dataService.langParse(subcategories[i], lang);
+      subcategories[i] = dataService.beautifyObj(subcategories[i], lang, ObjectTypes.subcategory);
       let products = await getAllProductsBySubcategoryId(subcategories[i].id);
       products.forEach(
-        (item, key, array) => (array[key] = dataService.langParse(item, lang))
+        (item, key, array) => {
+          array[key] = dataService.langParse(item, lang);
+        }
       );
       subcategories[i] = {
         subcategory: subcategories[i],
@@ -271,7 +240,7 @@ const products: FastifyPluginCallback = async function (
 
   fastify.get(
     "/subcategory/:subcategoryId",
-    { onSend: onSendGenericLangHandler },
+    {},
     async (req: any, res: FastifyReply) => {
       const lang = req.cookies.lang ?? "uk";
       let subcategory: Subcategory | null = await getSubcategoryById(
@@ -289,12 +258,14 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
-      subcategory = dataService.langParse(subcategory, lang);
+      subcategory = dataService.beautifyObj(subcategory, lang, ObjectTypes.subcategory);
       const products: Product[] = await getAllProductsBySubcategoryId(
         parseInt(req.params.subcategoryId)
       );
       products.forEach(
-        (item, key, array) => (array[key] = dataService.langParse(item, lang))
+        (item, key, array) => {
+          array[key] = dataService.langParse(item, lang)
+        }
       );
       return res.status(200).send({ subcategory, products });
     }
@@ -302,8 +273,9 @@ const products: FastifyPluginCallback = async function (
 
   fastify.get(
     "/product/:productId",
-    { onSend: onSendGenericLangHandler },
+    {},
     async (req: any, res: FastifyReply) => {
+      let lang = req.cookies.lang ?? "uk";
       let product: Product | null = await getProductById(
         parseInt(req.params.productId)
       );
@@ -319,7 +291,7 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
-      product = dataService.langParse(product, req.cookies.lang ?? "uk");
+      product = dataService.langParse(product, lang);
       return res.status(200).send(product);
     }
   );
@@ -551,6 +523,7 @@ const products: FastifyPluginCallback = async function (
             return res.status(400).send(result);
           }
         }
+        return res.status(204);
       } else {
         const imageData = req.body.imageData;
         delete req.body["imageData"];
@@ -579,7 +552,7 @@ const products: FastifyPluginCallback = async function (
               imageData[imageName]
             );
             if (tempCreateResponse.error)
-              res.status(400).send(tempCreateResponse);
+              return res.status(400).send(tempCreateResponse);
           }
         }
         return res.status(200).send(updatedProduct);
