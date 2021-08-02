@@ -6,7 +6,7 @@ import news from "./routes/news";
 import products from "./routes/products";
 import cookie from "fastify-cookie";
 
-const server = fastify({ logger: true });
+const server = fastify({ logger: true, bodyLimit: 15485760 });
 
 server.register(fastifyCors, { origin: true });
 server.register(products, { prefix: "/products" });
