@@ -122,21 +122,22 @@ const products: FastifyPluginCallback = async function (
             ObjectTypes.product
           )
         );
-    } else {
-      for (let imgName in imageData) {
-        const imgBase64 = imageData[imgName];
-        const result: any = await fileService.createFile(
-          join(
-            resolve(__dirname, "../../"),
-            `static/img/product/${product.id}/${imgName}`
-          ),
-          imgBase64
-        );
-        if (result.error) {
-          return res.status(400).send(result);
-        }
-      }
-    }
+          }
+    // } else {
+    //   for (let imgName in imageData) {
+    //     const imgBase64 = imageData[imgName];
+    //     const result: any = await fileService.createFile(
+    //       join(
+    //         resolve(__dirname, "../../"),
+    //         `static/img/product/${product.id}/${imgName}`
+    //       ),
+    //       imgBase64
+    //     );
+    //     if (result.error) {
+    //       return res.status(400).send(result);
+    //     }
+    //   }
+    // }
     return res.status(200).send(product);
   });
 
