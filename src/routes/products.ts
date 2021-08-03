@@ -148,6 +148,11 @@ const products: FastifyPluginCallback = async function (
     { onSend: onSendGenericLangHandler },
     async (_req: any, res: any) => {
       const categories = await getAllCategories();
+      categories.forEach(
+        (item, key, array) => {
+          array[key] = dataService.imageUrlHandler(item, ObjectTypes.category);
+        }
+      );
       return res.status(200).send(categories);
     }
   );
