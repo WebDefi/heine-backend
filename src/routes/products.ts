@@ -107,12 +107,13 @@ const products: FastifyPluginCallback = async function (
   });
 
   fastify.put("/product/create", {}, async (req: any, res: any) => {
+    let body = req.body;
     const imageData = req.body.imageData;
-    delete req.body["imageData"];
-    const product = await createProduct({
-      data: req.body,
-      documents: Object.keys(imageData),
-    });
+    body["documents"] = Object.keys(imageData);
+    delete body["imageData"];
+    const product = await createProduct(
+      body,
+    );
     if (!product) {
       return res
         .status(400)
