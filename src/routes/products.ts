@@ -108,7 +108,7 @@ const products: FastifyPluginCallback = async function (
 
   fastify.put("/product/create", {}, async (req: any, res: any) => {
     let body = req.body;
-    const imageData = req.body.imageData;
+    const imageData = body.documents;
     body["documents"] = Object.keys(imageData);
     delete body["imageData"];
     const product = await createProduct(
