@@ -112,7 +112,7 @@ const products: FastifyPluginCallback = async function (
     delete body["imageData"];
     const product = await createProduct({
       body,
-      ...{ documents: Object.keys(imageData) },
+      documents: Object.keys(imageData),
     });
     if (!product) {
       return res
