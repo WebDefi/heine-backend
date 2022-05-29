@@ -51,7 +51,8 @@ model Product {
   faqs           Json[]
 
   subcategoryId Int
-  subcategory   Subcategory @relation(fields: [subcategoryId], references: [id])
+  subcategory   Subcategory              @relation(fields: [subcategoryId], references: [id])
+  accessories   ProducAccessoryBinding[]
 
   @@map("product")
 }
@@ -100,8 +101,9 @@ model Accessory {
   documents      String[]
   faqs           Json[]
 
-  accessorySubcategoryId Int                  @map("accessory_subcategory_id")
-  accessoryCategory      AccessorySubcategory @relation(fields: [accessorySubcategoryId], references: [id])
+  accessorySubcategoryId Int                      @map("accessory_subcategory_id")
+  accessoryCategory      AccessorySubcategory     @relation(fields: [accessorySubcategoryId], references: [id])
+  products               ProducAccessoryBinding[]
 
   @@map("accessory")
 }
@@ -113,4 +115,13 @@ model NewsPost {
   imageUrl String @map("image_url")
 
   @@map("news_post")
+}
+
+model ProducAccessoryBinding {
+  productId   Int
+  product     Product   @relation(fields: [productId], references: [id])
+  accessoryId Int
+  accessory   Accessory @relation(fields: [accessoryId], references: [id])
+
+  @@id([productId, accessoryId])
 }

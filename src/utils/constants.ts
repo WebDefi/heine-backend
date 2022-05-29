@@ -19,5 +19,6 @@ export const enum ObjectTypes {
   accessoryCategory = "Accessory_category",
   accessorySubcategory = "Accessory_subcategory",
   accessory = "Accessory",
-  newsPost = "News post"
+  newsPost = "News post",
+  productAccesoryBinding = "Product Accessory Binding relation",
 }

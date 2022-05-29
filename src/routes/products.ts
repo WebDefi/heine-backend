@@ -30,6 +30,11 @@ import { onSendGenericLangHandler } from "../utils/onSendLangHook";
 import { join, resolve } from "path";
 import fileService from "../utils/fileService";
 import dataService from "../utils/dataService";
+import {
+  createProductAccesoryEntry,
+  deleteProductAccessoryEntry,
+} from "src/queries/productAccessoryBindings";
+import { sendMail } from "src/utils/mail/sendMail";
 
 const sendError = (
   res: any,
@@ -111,9 +116,7 @@ const products: FastifyPluginCallback = async function (
     const imageData = body.documents;
     body["documents"] = Object.keys(imageData);
     delete body["imageData"];
-    const product = await createProduct(
-      body,
-    );
+    const product = await createProduct(body);
     if (!product) {
       return res
         .status(400)
@@ -148,11 +151,9 @@ const products: FastifyPluginCallback = async function (
     { onSend: onSendGenericLangHandler },
     async (_req: any, res: any) => {
       const categories = await getAllCategories();
-      categories.forEach(
-        (item, key, array) => {
-          array[key] = dataService.imageUrlHandler(item, ObjectTypes.category);
-        }
-      );
+      categories.forEach((item, key, array) => {
+        array[key] = dataService.imageUrlHandler(item, ObjectTypes.category);
+      });
       return res.status(200).send(categories);
     }
   );
@@ -228,13 +229,15 @@ const products: FastifyPluginCallback = async function (
       parseInt(req.params.categoryId)
     );
     for (let i = 0; i < subcategories.length; i++) {
-      subcategories[i] = dataService.beautifyObj(subcategories[i], lang, ObjectTypes.subcategory);
-      let products = await getAllProductsBySubcategoryId(subcategories[i].id);
-      products.forEach(
-        (item, key, array) => {
-          array[key] = dataService.langParse(item, lang);
-        }
+      subcategories[i] = dataService.beautifyObj(
+        subcategories[i],
+        lang,
+        ObjectTypes.subcategory
       );
+      let products = await getAllProductsBySubcategoryId(subcategories[i].id);
+      products.forEach((item, key, array) => {
+        array[key] = dataService.langParse(item, lang);
+      });
       subcategories[i] = {
         subcategory: subcategories[i],
         products: products,
@@ -263,15 +266,17 @@ const products: FastifyPluginCallback = async function (
             )
           );
       }
-      subcategory = dataService.beautifyObj(subcategory, lang, ObjectTypes.subcategory);
+      subcategory = dataService.beautifyObj(
+        subcategory,
+        lang,
+        ObjectTypes.subcategory
+      );
       const products: Product[] = await getAllProductsBySubcategoryId(
         parseInt(req.params.subcategoryId)
       );
-      products.forEach(
-        (item, key, array) => {
-          array[key] = dataService.langParse(item, lang)
-        }
-      );
+      products.forEach((item, key, array) => {
+        array[key] = dataService.langParse(item, lang);
+      });
       return res.status(200).send({ subcategory, products });
     }
   );
@@ -780,6 +785,70 @@ const products: FastifyPluginCallback = async function (
       return res.status(204).send();
     }
   );
+
+  fastify.post(
+    "/product/accessory/create",
+    {},
+    async (req: any, res: FastifyReply) => {
+      const productAccessoryBinding = await createProductAccesoryEntry(
+        req.body.productId,
+        req.body.accessoryId
+      );
+      if (!productAccessoryBinding) {
+        return res
+          .status(400)
+          .send(
+            new RequestError(
+              400,
+              ErrorTypes.invalidCreationDataError,
+              ErrorMessages.invalidCreationDataError,
+              ObjectTypes.productAccesoryBinding
+            )
+          );
+      } else {
+        req.status(200).send(productAccessoryBinding);
+      }
+    }
+  );
+
+  fastify.delete(
+    "/product/accessory/delete",
+    {},
+    async (req: any, res: FastifyReply) => {
+      const productAccessoryBinding = await deleteProductAccessoryEntry(
+        req.body.productId,
+        req.body.accessoryId
+      );
+      if (!productAccessoryBinding) {
+        return res
+          .status(400)
+          .send(
+            new RequestError(
+              400,
+              ErrorTypes.invalidDeleteDataError,
+              ErrorMessages.invalidDeleteDataError,
+              ObjectTypes.productAccesoryBinding
+            )
+          );
+      } else {
+        req.status(200).send(productAccessoryBinding);
+      }
+    }
+  );
+  fastify.post("/mail", async (req: any, res: FastifyReply) => {
+    try {
+      await sendMail(
+        req.body.email,
+        req.body.phone,
+        req.body.name,
+        req.body.message,
+        req.body.country,
+        req.body.speciality
+      );
+    } catch (error) {
+      res.status(400).send({ message: "Error when sending email", error });
+    }
+  });
 };
 
 export default products;
