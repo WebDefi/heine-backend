@@ -33,8 +33,8 @@ import dataService from "../utils/dataService";
 import {
   createProductAccesoryEntry,
   deleteProductAccessoryEntry,
-} from "src/queries/productAccessoryBindings";
-import { sendMail } from "src/utils/mail/sendMail";
+} from "../queries/productAccessoryBindings";
+import { sendMail } from "../utils/mail/sendMail";
 
 const sendError = (
   res: any,
