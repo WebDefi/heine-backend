@@ -1,3 +1,4 @@
+import { FastifyRequest } from "fastify";
 import { FastifyInstance, FastifyPluginCallback, FastifyReply } from "fastify";
 
 const auth: FastifyPluginCallback = async (fastify: FastifyInstance) => {
@@ -13,8 +14,8 @@ const auth: FastifyPluginCallback = async (fastify: FastifyInstance) => {
   });
 };
 
-const authHook = async (req: any, res: any, done: any) => {
-  if (req.method != "GET") {
+const authHook = async (req: FastifyRequest, res: any, done: any) => {
+  if (req.method != "GET" && req.url != "/authenticate") {
     const token = req.headers.authorization.split(" ")[1];
     const decodedToken = Buffer.from(token, "base64").toString("ascii");
     const [user, password] = decodedToken.split(":");
