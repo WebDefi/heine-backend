@@ -806,7 +806,7 @@ const products: FastifyPluginCallback = async function (
             )
           );
       } else {
-        req.status(200).send(productAccessoryBinding);
+        return req.status(200).send(productAccessoryBinding);
       }
     }
   );
@@ -831,7 +831,7 @@ const products: FastifyPluginCallback = async function (
             )
           );
       } else {
-        req.status(200).send(productAccessoryBinding);
+        return req.status(200).send(productAccessoryBinding);
       }
     }
   );
