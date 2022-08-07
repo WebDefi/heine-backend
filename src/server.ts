@@ -9,7 +9,7 @@ import auth, { authHook } from "./routes/auth";
 
 const server = fastify({ logger: true, bodyLimit: 15485760 });
 
-server.register(fastifyCors, { origin: true });
+server.register(fastifyCors, { origin: true, credentials: true });
 server.register(products, { prefix: "/products" });
 server.register(accessories, { prefix: "/accessories" });
 server.register(news, { prefix: "/news" });
